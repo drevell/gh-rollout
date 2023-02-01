@@ -14,6 +14,7 @@ env:
   GAR_LOCATION: us-west1
   GAR_REPO: ci-artifacts
   CLOUDRUN_SERVICE: my-service
+  SKAFFOLD_YAML_IMAGE_NAME: my-service-image # the artifact image name from skaffold.yaml
   REGION: us-west1 # TODO: update Cloud Run service region
 
 jobs:
@@ -67,7 +68,7 @@ jobs:
           service: ${{ env.CLOUDRUN_SERVICE }}
           region: ${{ env.REGION }}
           # NOTE: If using a pre-built image, update the image name here
-          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}:${{ github.sha }}
+          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ SKAFFOLD_YAML_IMAGE_NAME }}:${{ github.sha }}
 
       # # If required, use the Cloud Run url output in later steps
       # - name: Show Output
