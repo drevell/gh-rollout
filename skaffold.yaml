@@ -1,0 +1,14 @@
+apiVersion: skaffold/v4beta1
+kind: Config
+metadata:
+  name: gh-rollout
+build:
+  artifacts:
+  # The repo name is omitted from the following line because we will use --default-repo on the
+  # command line locally and in the GitHub action.
+  - image: my-service-image
+    buildpacks:
+      builder: gcr.io/buildpacks/builder:v1
+manifests:
+  rawYaml:
+  - deploy/run-dev.yaml
