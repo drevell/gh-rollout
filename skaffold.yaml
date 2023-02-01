@@ -3,6 +3,9 @@ kind: Config
 metadata:
   name: gh-rollout
 build:
+  tagPolicy:
+    gitCommit:
+      variant: CommitSha # Use the full git commit hash as the docker image tag, not abbreviated
   artifacts:
   # The repo name is omitted from the following line because we will use --default-repo on the
   # command line locally and in the GitHub action.
