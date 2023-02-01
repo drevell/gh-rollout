@@ -90,6 +90,9 @@ jobs:
       #     docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}:${{ github.sha }}"
 
       # TODO is there a skaffold action that would make this cleaner?
+      - name: 'Install Skaffold'
+        run: |-
+          gcloud components install skaffold
       - name: Skaffold build
         run: |-
           skaffold build --default-repo=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
