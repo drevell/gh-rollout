@@ -11,20 +11,13 @@ on:
 
 jobs:
   call-common-deploy:
-    runs-on: ubuntu-latest
-    environment: 'dev'
-    permissions: # Add 'id-token' with the intended permissions for workload identity federation
-      contents: 'read'
-      id-token: 'write'
-    steps:
-    - name: 'call reusable deploy workflow'
-      uses: './.github/workflows/common-deploy.yml'
-      secrets: 
-        WIF_PROVIDER: ${{ secrets.WIF_PROVIDER }}
-        WIF_SERVICE_ACCOUNT: ${{ secrets.WIF_SERVICE_ACCOUNT }}
-      with:
-        project_id: vars.PROJECT_ID
-        gar_region: vars.GAR_REGION
-        gar_repo: vars.GAR_REPO
-        cloudrun_service: vars.CLOUDRUN_SERVICE
-        docker_image: vars.DOCKER_IMAGE
+    uses: './.github/workflows/common-deploy.yml'
+    secrets: inherit 
+      #   WIF_PROVIDER: ${{ secrets.WIF_PROVIDER }}
+      #   WIF_SERVICE_ACCOUNT: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+      # with:
+      #   project_id: vars.PROJECT_ID
+      #   gar_region: vars.GAR_REGION
+      #   gar_repo: vars.GAR_REPO
+      #   cloudrun_service: vars.CLOUDRUN_SERVICE
+      #   docker_image: vars.DOCKER_IMAGE
