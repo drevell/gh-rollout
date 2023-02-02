@@ -19,7 +19,9 @@ jobs:
     steps:
     - name: 'call reusable deploy workflow'
       uses: './.github/workflows/common-deploy.yml'
-      secrets: inherit
+      secrets: 
+        WIF_PROVIDER: ${{ secrets.WIF_PROVIDER }}
+        WIF_SERVICE_ACCOUNT: ${{ secrets.WIF_SERVICE_ACCOUNT }}
       with:
         project_id: vars.PROJECT_ID
         gar_region: vars.GAR_REGION
