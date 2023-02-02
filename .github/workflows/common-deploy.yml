@@ -1,81 +1,39 @@
-on:
-  workflow_call:
-    secrets:
-      WIF_PROVIDER:
-        required: true
-      WIF_SERVICE_ACCOUNT:
-        required: true
-    inputs:
-      project_id:
-        required: true
-        type: string
-        description: "the project ID of the project containing the Artifact Registry; e.g. my-project-123"
-      gar_region:
-        required: true
-        type: string
-        description: "the region of the artifact registry; e.g. us-west1"
-      gar_repo:
-        required: true
-        type: string
-        description: "the name of the Artifact Registry repository; e.g. my-ci-artifacts"
-      cloudrun_service:
-        required: true
-        type: string
-        description: "the name of the Cloud Run service to deploy to; e.g. my-cloudrun-service"
-      cloudrun_region:
-        required: true
-        type: string
-        description: "the region containing the Cloud Run service to deploy to; e.g. us-central1"
-      docker_image:
-        required: true
-        type: string
-        description: "the name of the docker image to deploy, not including any tags; e.g. my-service-image"
+# on:
+#   workflow_call:
+#     secrets:
+#       WIF_PROVIDER:
+#         required: true
+#       WIF_SERVICE_ACCOUNT:
+#         required: true
+#     inputs:
+#       project_id:
+#         required: true
+#         type: string
+#         description: "the project ID of the project containing the Artifact Registry; e.g. my-project-123"
+#       gar_region:
+#         required: true
+#         type: string
+#         description: "the region of the artifact registry; e.g. us-west1"
+#       gar_repo:
+#         required: true
+#         type: string
+#         description: "the name of the Artifact Registry repository; e.g. my-ci-artifacts"
+#       cloudrun_service:
+#         required: true
+#         type: string
+#         description: "the name of the Cloud Run service to deploy to; e.g. my-cloudrun-service"
+#       cloudrun_region:
+#         required: true
+#         type: string
+#         description: "the region containing the Cloud Run service to deploy to; e.g. us-central1"
+#       docker_image:
+#         required: true
+#         type: string
+#         description: "the name of the docker image to deploy, not including any tags; e.g. my-service-image"
 
 
-jobs:
-  deploy:
+# jobs:
+#   deploy:
 
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Google Auth
-        id: auth
-        uses: 'google-github-actions/auth@v0'
-        with:
-          token_format: 'access_token'
-          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
-
-      # Authenticate Docker to Google Cloud Artifact Registry
-      # TODO: make sure this is needed
-      - name: Docker Auth
-        id: docker-auth
-        uses: 'docker/login-action@v2'
-        with:
-          username: 'oauth2accesstoken'
-          password: '${{ steps.auth.outputs.access_token }}'
-          registry: '${{ inputs.gar_region }}-docker.pkg.dev'
-
-      # TODO is there a skaffold action that would make this cleaner?
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v1'
-      - name: 'Install Skaffold'
-        run: |-
-          gcloud components install skaffold
-      - name: Skaffold build
-        run: |-
-          skaffold build -t ci-${{ github.run_id }}-${{ github.run_number }} --default-repo=${{ inputs.gar_region }}-docker.pkg.dev/${{ inputs.project_id }}/${{ inputs.gar_repo }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
-
-      - name: Deploy to Cloud Run
-        id: deploy
-        uses: google-github-actions/deploy-cloudrun@v0
-        with:
-          service: ${{ inputs.cloudrun_service }}
-          region: ${{ inputs.cloudrun_region }}
-          image: ${{ inputs.gar_region }}-docker.pkg.dev/${{ inputs.project_id }}/${{ inputs.gar_repo }}/${{ inputs.docker_image }}:ci-${{ github.run_id }}-${{ github.run_number }}
-
-      # If required, use the Cloud Run url output in later steps
-      - name: Show Output
-        run: echo ${{ steps.deploy.outputs.url }}
+#     runs-on: ubuntu-latest
+    

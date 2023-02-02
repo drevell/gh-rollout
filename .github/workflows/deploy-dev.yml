@@ -10,14 +10,51 @@ on:
     branches: [ 'main' ] # TODO think about the real conditions
 
 jobs:
-  call-common-deploy:
-    uses: './.github/workflows/common-deploy.yml'
-    secrets: inherit 
-      #   WIF_PROVIDER: ${{ secrets.WIF_PROVIDER }}
-      #   WIF_SERVICE_ACCOUNT: ${{ secrets.WIF_SERVICE_ACCOUNT }}
-      # with:
-      #   project_id: vars.PROJECT_ID
-      #   gar_region: vars.GAR_REGION
-      #   gar_repo: vars.GAR_REPO
-      #   cloudrun_service: vars.CLOUDRUN_SERVICE
-      #   docker_image: vars.DOCKER_IMAGE
+  build-deploy:
+    name: 'Build and Deploy'
+    environment: dev # Get secrets and variables of this env
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v0'
+        with:
+          token_format: 'access_token'
+          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+
+      # Authenticate Docker to Google Cloud Artifact Registry
+      # TODO: make sure this is needed
+      - name: Docker Auth
+        id: docker-auth
+        uses: 'docker/login-action@v2'
+        with:
+          username: 'oauth2accesstoken'
+          password: '${{ steps.auth.outputs.access_token }}'
+          registry: '${{ inputs.gar_region }}-docker.pkg.dev'
+
+      # TODO is there a skaffold action that would make this cleaner?
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
+      - name: 'Install Skaffold'
+        run: |-
+          gcloud components install skaffold
+      - name: Skaffold build
+        run: |-
+          skaffold build -t ci-${{ github.run_id }}-${{ github.run_number }} --default-repo=${{ inputs.gar_region }}-docker.pkg.dev/${{ inputs.project_id }}/${{ inputs.gar_repo }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v0
+        with:
+          service: ${{ inputs.cloudrun_service }}
+          region: ${{ inputs.cloudrun_region }}
+          image: ${{ inputs.gar_region }}-docker.pkg.dev/${{ inputs.project_id }}/${{ inputs.gar_repo }}/${{ inputs.docker_image }}:ci-${{ github.run_id }}-${{ github.run_number }}
+
+      # If required, use the Cloud Run url output in later steps
+      - name: Show Output
+        run: echo ${{ steps.deploy.outputs.url }}
+
