@@ -4,7 +4,7 @@ on:
       WIF_PROVIDER:
         required: true
       WIF_SERVICE_ACCOUNT:
-        required: true
+        required:
     inputs:
       project_id:
         required: true
