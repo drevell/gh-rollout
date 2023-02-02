@@ -11,8 +11,11 @@ on:
 
 jobs:
   build-deploy:
-    name: 'Build and Deploy'
+    name: 'Build and deploy to dev'
     environment: dev # Get secrets and variables of this env
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     runs-on: 'ubuntu-latest'
     steps:
       - name: Checkout
