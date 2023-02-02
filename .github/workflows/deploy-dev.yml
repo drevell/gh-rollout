@@ -7,14 +7,17 @@ name: Build and Deploy to Dev
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ] # TODO think about the real conditions
+    branches: [ 'main' ] # TODO think about the real conditions
 
 jobs:
   call-common-deploy:
     runs-on: ubuntu-latest
-    environment: dev
+    environment: 'dev'
+    permissions: # Add 'id-token' with the intended permissions for workload identity federation
+      contents: 'read'
+      id-token: 'write'
     steps:
-    - name: call reusable deploy workflow
+    - name: 'call reusable deploy workflow'
       uses: './.github/workflows/common-deploy.yml'
       secrets: inherit
       with:

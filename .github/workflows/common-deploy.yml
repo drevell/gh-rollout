@@ -4,7 +4,7 @@ on:
       WIF_PROVIDER:
         required: true
       WIF_SERVICE_ACCOUNT:
-        required:
+        required: true
     inputs:
       project_id:
         required: true
@@ -34,10 +34,6 @@ on:
 
 jobs:
   deploy:
-    # Add 'id-token' with the intended permissions for workload identity federation
-    permissions:
-      contents: 'read'
-      id-token: 'write'
 
     runs-on: ubuntu-latest
     steps:
