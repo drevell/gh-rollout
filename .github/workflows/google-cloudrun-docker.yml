@@ -12,6 +12,7 @@ on:
 jobs:
   call-common-deploy:
     uses: './.github/workflows/common-deploy.yml'
+    environment: dev
     with:
       project_id: vars.PROJECT_ID
       gar_region: vars.GAR_REGION
