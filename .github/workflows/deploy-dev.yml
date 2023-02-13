@@ -10,6 +10,7 @@ on:
     branches: [ 'main' ] # TODO think about the real conditions
 
 jobs:
+  # TODO factor out a build-only job that doesn't deploy?
   build-deploy:
     name: 'Build and deploy to dev'
     environment: dev # Get secrets and variables of this env
@@ -46,9 +47,6 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v1'
         with:
           install_components: 'skaffold'
-      # - name: 'Install Skaffold'
-      #   run: |-
-      #     gcloud components install skaffold
       - name: Skaffold build
         run: |-
           skaffold build -t ci-${{ github.run_id }}-${{ github.run_number }} --default-repo=${{ vars.gar_region }}-docker.pkg.dev/${{ vars.project_id }}/${{ vars.gar_repo }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
@@ -61,7 +59,7 @@ jobs:
           region: ${{ vars.cloudrun_region }}
           image: ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.project_id }}/${{ vars.gar_repo }}/${{ vars.docker_image }}:ci-${{ github.run_id }}-${{ github.run_number }}
 
-      # If required, use the Cloud Run url output in later steps
-      - name: Show Output
-        run: echo ${{ steps.deploy.outputs.url }}
+      # # If required, use the Cloud Run url output in later steps
+      # - name: Show Output
+      #   run: echo ${{ steps.deploy.outputs.url }}
 
