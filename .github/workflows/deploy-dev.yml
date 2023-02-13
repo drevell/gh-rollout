@@ -39,12 +39,15 @@ jobs:
           password: '${{ steps.auth.outputs.access_token }}'
           registry: '${{ vars.gar_region }}-docker.pkg.dev'
 
+      # TODO have a separate registry for CI images that's only writeable by CI. Then we can tag images with the SHA rather than the $run_number.
+
       # TODO is there a skaffold action that would make this cleaner?
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v1'
-      - name: 'Install Skaffold'
-        run: |-
-          gcloud components install skaffold
+        install_components: 'skaffold'
+      # - name: 'Install Skaffold'
+      #   run: |-
+      #     gcloud components install skaffold
       - name: Skaffold build
         run: |-
           skaffold build -t ci-${{ github.run_id }}-${{ github.run_number }} --default-repo=${{ vars.gar_region }}-docker.pkg.dev/${{ vars.project_id }}/${{ vars.gar_repo }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
