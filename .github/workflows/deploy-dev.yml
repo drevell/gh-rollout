@@ -44,7 +44,8 @@ jobs:
       # TODO is there a skaffold action that would make this cleaner?
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v1'
-        install_components: 'skaffold'
+        with:
+          install_components: 'skaffold'
       # - name: 'Install Skaffold'
       #   run: |-
       #     gcloud components install skaffold
