@@ -15,7 +15,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    with:
+    # with:
       # project_id: '${{ vars.project_id }}'
       # gar_region: '${{ vars.gar_region }}'
       # gar_repo: '${{ vars.gar_repo }}'
