@@ -27,6 +27,7 @@ jobs:
     needs: call-build 
     permissions:
       id-token: 'write'
+    with:
       environment_: 'dev'
     secrets: inherit
   
