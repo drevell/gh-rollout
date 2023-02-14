@@ -35,6 +35,9 @@ on:
 jobs:
   build-and-upload:
     name: Build and upload image
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
