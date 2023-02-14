@@ -11,7 +11,7 @@ on:
 
 jobs:
   call-build:
-    uses: '.github/workflows/reusable-build.yml@main'
+    uses: './.github/workflows/reusable-build.yml@main'
     with:
       project_id: '${{ vars.project_id }}'
       gar_region: '${{ vars.gar_region }}'
