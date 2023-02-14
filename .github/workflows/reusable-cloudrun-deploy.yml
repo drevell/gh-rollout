@@ -44,4 +44,4 @@ jobs:
         region: ${{ vars.cloudrun_region }}
         project_id: ${{ vars.cloudrun_project_id }}
         # TODO factor out ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }}, it appears in both reusable jobs
-        image: ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }}/${{ vars.docker_image }}:${{ github.sha }}}}
+        image: ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }}/${{ vars.docker_image }}:${{ github.sha }}

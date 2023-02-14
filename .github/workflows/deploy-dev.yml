@@ -1,7 +1,7 @@
 # TODO:
 #  - caching build steps; setting up gcloud is slow
 
-name: Build and Deploy to Dev
+name: Build and Deploy
 
 on:
   workflow_dispatch:
