@@ -1,5 +1,15 @@
 # Builds a container image using skaffold and uploads it to Artifact Registry, tagged with the
 # current SHA.
+#
+# Requires:
+#  - Caller must declare the id-token write permission, for example:
+#       permissions:
+#         id-token: write
+#  - There must be these variables configured at the org, repo, or environment level:
+#    - gar_region: the region containing the Artifact Registry, e.g. us-west1
+#    - gar_repo: the name of the repo within Artifact Registry, e.g. my-container-images
+#    - admin_project_id: the project ID of the project containing Artifact Registry
+
 
 on:
   workflow_call:
