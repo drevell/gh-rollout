@@ -11,7 +11,7 @@ on:
 
 jobs:
   call-build:
-    uses: '.github/workflows/reusable-build.yml'
+    uses: '.github/workflows/reusable-build.yml@main'
     with:
       project_id: '${{ vars.project_id }}'
       gar_region: '${{ vars.gar_region }}'
@@ -69,4 +69,3 @@ jobs:
   #     # # If required, use the Cloud Run url output in later steps
   #     # - name: Show Output
   #     #   run: echo ${{ steps.deploy.outputs.url }}
-
