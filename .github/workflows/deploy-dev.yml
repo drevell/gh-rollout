@@ -1,6 +1,5 @@
 # TODO:
 #  - caching build steps; setting up gcloud is slow
-#  - can this work without the service account having actAs permission on the default compute service account?
 
 name: Build and Deploy to Dev
 
@@ -11,6 +10,7 @@ on:
 
 jobs:
   call-build:
+    name: 'Build and upload image'
     uses: './.github/workflows/reusable-build.yml'
     permissions:
       contents: 'read'
@@ -19,7 +19,7 @@ jobs:
       # project_id: '${{ vars.project_id }}'
       # gar_region: '${{ vars.gar_region }}'
       # gar_repo: '${{ vars.gar_repo }}'
-      environment_: 'dev'
+      # environment_: 'dev'
     secrets: inherit
   
   # TODO factor out a build-only job that doesn't deploy?
