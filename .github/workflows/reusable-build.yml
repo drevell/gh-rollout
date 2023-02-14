@@ -20,7 +20,7 @@ on:
       WIF_SERVICE_ACCOUNT:
         # e.g. - my-service-account@my-project.iam.gserviceaccount.com
         required: true
-    inputs:
+    # inputs:
       # environment_:  # Trailing underscore avoids confusion with built-in environment
       #   required: true
       #   type: string
