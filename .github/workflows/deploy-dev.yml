@@ -16,9 +16,9 @@ jobs:
       contents: 'read'
       id-token: 'write'
     with:
-      project_id: '${{ vars.project_id }}'
-      gar_region: '${{ vars.gar_region }}'
-      gar_repo: '${{ vars.gar_repo }}'
+      # project_id: '${{ vars.project_id }}'
+      # gar_region: '${{ vars.gar_region }}'
+      # gar_repo: '${{ vars.gar_repo }}'
       env: 'dev'
     secrets: inherit
   

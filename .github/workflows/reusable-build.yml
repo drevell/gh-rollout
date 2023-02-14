@@ -12,18 +12,18 @@ on:
         required: true
         type: string
         description: "the name of the GitHub environment to pull variables and secretes from; e.g. dev"
-      project_id:
-        required: true
-        type: string
-        description: "the project ID of the project containing the Artifact Registry; e.g. my-project-123"
-      gar_region:
-        required: true
-        type: string
-        description: "the region of the artifact registry; e.g. us-west1"
-      gar_repo:
-        required: true
-        type: string
-        description: "the name of the Artifact Registry repository; e.g. my-ci-artifacts"
+      # project_id:
+      #   required: true
+      #   type: string
+      #   description: "the project ID of the project containing the Artifact Registry; e.g. my-project-123"
+      # gar_region:
+      #   required: true
+      #   type: string
+      #   description: "the region of the artifact registry; e.g. us-west1"
+      # gar_repo:
+      #   required: true
+      #   type: string
+      #   description: "the name of the Artifact Registry repository; e.g. my-ci-artifacts"
       # cloudrun_service:
       #   required: true
       #   type: string
@@ -45,7 +45,7 @@ jobs:
       contents: 'read'
       id-token: 'write'
     runs-on: ubuntu-latest
-    environment: '${{ inputs.env }}'
+    environment: '${{ vars.env }}'
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -59,7 +59,7 @@ jobs:
         service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
 
     - name: Show Output
-      run: 'echo abcdef gar_region is ${{ inputs.gar_region }}'
+      run: 'echo abcdef gar_region is ${{ vars.gar_region }}'
 
     # Authenticate Docker to Google Cloud Artifact Registry
     # TODO: make sure this is needed
@@ -69,7 +69,7 @@ jobs:
       with:
         username: 'oauth2accesstoken'
         password: '${{ steps.auth.outputs.access_token }}'
-        registry: '${{ inputs.gar_region }}-docker.pkg.dev'
+        registry: '${{ vars.gar_region }}-docker.pkg.dev'
 
     # TODO have a separate registry for CI images that's only writeable by CI. Then we can tag images with the SHA rather than the $run_number.
 
@@ -79,12 +79,12 @@ jobs:
         install_components: 'skaffold'
     - name: Skaffold build
       run: |-
-        skaffold build -t ci-${{ github.run_id }}-${{ github.run_number }} --default-repo=${{ inputs.gar_region }}-docker.pkg.dev/${{ inputs.project_id }}/${{ inputs.gar_repo }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
+        skaffold build -t ci-${{ github.run_id }}-${{ github.run_number }} --default-repo=${{ vars.gar_region }}-docker.pkg.dev/${{ vars.project_id }}/${{ vars.gar_repo }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
 
     - name: Deploy to Cloud Run
       id: deploy
       uses: google-github-actions/deploy-cloudrun@v0
       with:
-        service: ${{ inputs.cloudrun_service }}
-        region: ${{ inputs.cloudrun_region }}
-        image: ${{ inputs.gar_region }}-docker.pkg.dev/${{ inputs.project_id }}/${{ inputs.gar_repo }}/${{ inputs.docker_image }}:ci-${{ github.run_id }}-${{ github.run_number }}
+        service: ${{ vars.cloudrun_service }}
+        region: ${{ vars.cloudrun_region }}
+        image: ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.project_id }}/${{ vars.gar_repo }}/${{ vars.docker_image }}:ci-${{ github.run_id }}-${{ github.run_number }}
