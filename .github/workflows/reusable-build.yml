@@ -58,7 +58,7 @@ jobs:
     #   contents: 'read'
     #   id-token: 'write'
     runs-on: ubuntu-latest
-    environment: '${{ inputs.environment_ }}'
+    # environment: '${{ inputs.environment_ }}'
     steps:
     - name: Checkout
       uses: actions/checkout@v3
