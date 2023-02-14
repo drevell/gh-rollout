@@ -1,0 +1,47 @@
+on:
+  workflow_call:
+    secrets:
+      WIF_PROVIDER:
+        # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+        required: true
+      WIF_SERVICE_ACCOUNT:
+        # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+        required: true
+    inputs:
+      environment_:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: 'Deploy to ${{ inputs.environment }}' # TODO does this work?
+    environment: '${{ inputs.environment_ }}'
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Google Auth
+      id: auth
+      uses: 'google-github-actions/auth@v0'
+      with:
+        token_format: 'access_token'
+        workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+        service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+
+    # # Authenticate Docker to Google Cloud Artifact Registry
+    # - name: Docker Auth
+    #   id: docker-auth
+    #   uses: 'docker/login-action@v2'
+    #   with:
+    #     username: 'oauth2accesstoken'
+    #     password: '${{ steps.auth.outputs.access_token }}'
+    #     registry: '${{ vars.gar_region }}-docker.pkg.dev'
+
+    - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: ${{ vars.cloudrun_service }}
+          region: ${{ vars.cloudrun_region }}
+          project_id: ${{ vars.cloudrun_project_id }}
+          # TODO factor out ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }}, it appears in both reusable jobs
+          image: ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }}/${{ vars.docker_image }}:${{ github.sha }}}}

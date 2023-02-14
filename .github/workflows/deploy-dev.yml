@@ -21,8 +21,16 @@ jobs:
       # gar_repo: '${{ vars.gar_repo }}'
       # environment_: 'dev'
     secrets: inherit
+  call-deploy-dev:
+    name: 'Deploy to dev'
+    uses: './.github/workflows/reusable-cloudrun-deploy.yml'
+    needs: call-build 
+    permissions:
+      id-token: 'write'
+      environment_: 'dev'
+    secrets: inherit
   
-  # TODO factor out a build-only job that doesn't deploy?
+  # Old pre-refactor:
   # build-deploy:
   #   name: 'Build and deploy to dev'
   #   environment: dev # Get secrets and variables of this env

@@ -10,6 +10,7 @@
 #    - gar_repo: the name of the repo within Artifact Registry, e.g. my-container-images
 #    - admin_project_id: the project ID of the project containing Artifact Registry
 
+# TODO make this manually runnable. Do we have to duplicate the inputs and secrets between workflow_call and workflow_dispatch?
 
 on:
   workflow_call:
@@ -80,7 +81,7 @@ jobs:
         password: '${{ steps.auth.outputs.access_token }}'
         registry: '${{ vars.gar_region }}-docker.pkg.dev'
 
-    # TODO have a separate registry for CI images that's only writeable by CI. Then we can tag images with the SHA rather than the $run_number.
+    # TODO have a separate registry for CI images that's only writeable by CI.
 
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v1'
@@ -91,10 +92,4 @@ jobs:
       run: |-
         skaffold build -t ${{ github.sha }} --default-repo=${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
 
-    # - name: Deploy to Cloud Run
-    #   id: deploy
-    #   uses: google-github-actions/deploy-cloudrun@v0
-    #   with:
-    #     service: ${{ vars.cloudrun_service }}
-    #     region: ${{ vars.cloudrun_region }}
-    #     image: ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.project_id }}/${{ vars.gar_repo }}/${{ vars.docker_image }}:ci-${{ github.run_id }}-${{ github.run_number }}
+ 
