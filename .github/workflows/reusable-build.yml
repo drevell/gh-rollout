@@ -1,3 +1,6 @@
+# Builds a container image using skaffold and uploads it to Artifact Registry, tagged with the
+# current SHA.
+
 on:
   workflow_call:
     secrets:
@@ -8,7 +11,7 @@ on:
         # e.g. - my-service-account@my-project.iam.gserviceaccount.com
         required: true
     inputs:
-      env:
+      environment_:  # Trailing underscore avoids confusion with built-in environment
         required: true
         type: string
         description: "the name of the GitHub environment to pull variables and secretes from; e.g. dev"
@@ -40,12 +43,12 @@ on:
 
 jobs:
   build-and-upload:
-    name: Build and upload image
+    name: Build and upload container image
     permissions:
       contents: 'read'
       id-token: 'write'
     runs-on: ubuntu-latest
-    environment: '${{ inputs.env }}'
+    environment: '${{ inputs.environment_ }}'
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -58,11 +61,7 @@ jobs:
         workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
         service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
 
-    - name: Show Output
-      run: 'echo abcdef gar_region is ${{ vars.gar_region }}'
-
     # Authenticate Docker to Google Cloud Artifact Registry
-    # TODO: make sure this is needed
     - name: Docker Auth
       id: docker-auth
       uses: 'docker/login-action@v2'
@@ -77,14 +76,15 @@ jobs:
       uses: 'google-github-actions/setup-gcloud@v1'
       with:
         install_components: 'skaffold'
+
     - name: Skaffold build
       run: |-
-        skaffold build -t ci-${{ github.run_id }}-${{ github.run_number }} --default-repo=${{ vars.gar_region }}-docker.pkg.dev/${{ vars.project_id }}/${{ vars.gar_repo }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
+        skaffold build -t ${{ github.sha }} --default-repo=${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
 
-    - name: Deploy to Cloud Run
-      id: deploy
-      uses: google-github-actions/deploy-cloudrun@v0
-      with:
-        service: ${{ vars.cloudrun_service }}
-        region: ${{ vars.cloudrun_region }}
-        image: ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.project_id }}/${{ vars.gar_repo }}/${{ vars.docker_image }}:ci-${{ github.run_id }}-${{ github.run_number }}
+    # - name: Deploy to Cloud Run
+    #   id: deploy
+    #   uses: google-github-actions/deploy-cloudrun@v0
+    #   with:
+    #     service: ${{ vars.cloudrun_service }}
+    #     region: ${{ vars.cloudrun_region }}
+    #     image: ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.project_id }}/${{ vars.gar_repo }}/${{ vars.docker_image }}:ci-${{ github.run_id }}-${{ github.run_number }}
