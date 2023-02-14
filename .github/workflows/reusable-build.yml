@@ -8,6 +8,10 @@ on:
         # e.g. - my-service-account@my-project.iam.gserviceaccount.com
         required: true
     inputs:
+      env:
+        required: true
+        type: string
+        description: "the name of the GitHub environment to pull variables and secretes from; e.g. dev"
       project_id:
         required: true
         type: string
@@ -41,6 +45,7 @@ jobs:
       contents: 'read'
       id-token: 'write'
     runs-on: ubuntu-latest
+    environment: '${{ inputs.env }}'
     steps:
     - name: Checkout
       uses: actions/checkout@v3
