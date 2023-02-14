@@ -12,6 +12,9 @@ on:
 jobs:
   call-build:
     uses: './.github/workflows/reusable-build.yml'
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     with:
       project_id: '${{ vars.project_id }}'
       gar_region: '${{ vars.gar_region }}'
