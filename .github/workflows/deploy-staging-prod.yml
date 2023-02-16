@@ -7,8 +7,6 @@ on:
 
 jobs:
   wait-for-build:
-    # The existence of this job is a hack around the fact that we can only have one concurrency key
-    # per job, and we need two.
     # If there's a build in progress for this SHA, wait for it. We can't deploy it to staging until
     # it's actually built. This concurrency value is shared with the build step. We assume that the
     # build will run first before this workflow, because it's initiated automatically and
@@ -19,7 +17,7 @@ jobs:
 
     steps:
     - name: No-op
-      run: echo "This is a noop step"
+      run: echo "This is a noop step that just waits for the build to finish"
 
   call-deploy-staging:
     needs: wait-for-build
