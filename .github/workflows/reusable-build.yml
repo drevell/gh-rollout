@@ -59,7 +59,8 @@ jobs:
     #   contents: 'read'
     #   id-token: 'write'
     runs-on: ubuntu-latest
-    # environment: '${{ inputs.environment_ }}'
+    # We only want to build each image once. Later builds will exit early (see ALREADY_BUILT below).
+    concurrency: 'building-at-${{ github.sha }}'
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -72,8 +73,24 @@ jobs:
         workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
         service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
 
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v1'
+      with:
+        install_components: 'skaffold'
+
+    # We made this workflow idempotent so it can be rerun cheaply at the same SHA. This allows us
+    # to just re-run the build if we're not sure the image already exists when it's time for the
+    # staging deployment.
+    - name: Check whether image already exists
+      id: already-built
+      run: |-
+        if gcloud artifacts docker tags list ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }}/${{ vars.docker_image}} --filter=${{ github.sha }} --limit 1 --format='table("YES_IT_MATCHED")' | grep YES_IT_MATCHED
+        then echo "ALREADY_BUILT=true" >> $GITHUB_OUTPUT
+        fi
+
     # Authenticate Docker to Google Cloud Artifact Registry
     - name: Docker Auth
+      if: '!steps.already-built.outputs.ALREADY_BUILT'
       id: docker-auth
       uses: 'docker/login-action@v2'
       with:
@@ -81,14 +98,8 @@ jobs:
         password: '${{ steps.auth.outputs.access_token }}'
         registry: '${{ vars.gar_region }}-docker.pkg.dev'
 
-    # TODO have a separate registry for CI images that's only writeable by CI.
-
-    - name: 'Set up Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v1'
-      with:
-        install_components: 'skaffold'
-
     - name: Skaffold build
+      if: '!steps.already-built.outputs.ALREADY_BUILT'
       run: |-
         skaffold build -t ${{ github.sha }} --default-repo=${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
 
