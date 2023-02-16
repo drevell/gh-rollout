@@ -6,13 +6,22 @@ on:
     - cron: '50 11 * * * ' # Daily early morning push, in UTC.
 
 jobs:
-  call-deploy-staging:
+  # The existence of this job is a hack around the fact that we can only have one concurrency key
+  # per job, and we need two.
+  wait-for-build:
+    id: wait-for-build
     # If there's a build in progress for this SHA, wait for it. We can't deploy it to staging until
     # it's actually built. This concurrency value is shared with the build step. We assume that the
     # build will run first before this workflow, because it's initiated automatically and
     # immediately when a PR is merged. Whereas this workflow will probably run later. Maybe this
     # assumption is sketchy.
     concurrency: 'build-of-${{ github.sha }}'
+    steps:
+    - name: No-op
+      run: echo "This is a noop step"
+
+  call-deploy-staging:
+    needs: wait-for-build
 
     # Only one staging deployment should be in flight at a time.
     concurrency: staging-deployment
