@@ -16,8 +16,10 @@ jobs:
     name: 'Deploy'  # variable substitution doesn't work here, we can't add the env name
     environment: '${{ inputs.environment_ }}'
     runs-on: ubuntu-latest
-    steps:
+    permissions:
+      id-token: 'write'
 
+    steps:
     - name: Google Auth
       id: auth
       uses: 'google-github-actions/auth@v0'
