@@ -5,22 +5,24 @@
 #  - Caller must declare the id-token write permission, for example:
 #       permissions:
 #         id-token: write
-#  - There must be these variables configured at the org, repo, or environment level:
+#  - There must be these variables configured at the org or repo leve;:
 #    - gar_region: the region containing the Artifact Registry, e.g. us-west1
 #    - gar_repo: the name of the repo within Artifact Registry, e.g. my-container-images
 #    - admin_project_id: the project ID of the project containing Artifact Registry
+#  - There must also be these secrets:
+#    - WIF_PROVIDER: e.g. projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+#    - WIF_SERVICE_ACCOUNT: e.g. my-service-account@my-project.iam.gserviceaccount.com
 
 # TODO make this manually runnable. Do we have to duplicate the inputs and secrets between workflow_call and workflow_dispatch?
 
 on:
   workflow_call:
-    # secrets:
-    #   WIF_PROVIDER:
-    #     # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-    #     required: true
-    #   WIF_SERVICE_ACCOUNT:
-    #     # e.g. - my-service-account@my-project.iam.gserviceaccount.com
-    #     required: true
+    inputs:
+      force-overwrite:
+        required: false
+        default: false
+        description: 'Force rebuilding and overwriting the container image if it already exists in GAR'
+        type: bool
 
 
 jobs:
@@ -51,8 +53,10 @@ jobs:
 
     # We made this workflow idempotent so it can be rerun cheaply at the same SHA. This allows us
     # to just re-run the build if we're not sure the image already exists when it's time for the
-    # staging deployment.
+    # staging deployment. The caller can force an unconditional rebuild using the force-rebuild
+    # parameter.
     - name: Check whether image already exists
+      if: '!inputs.force-overwrite'
       id: already-built
       run: |-
         if gcloud artifacts docker tags list ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }}/${{ vars.docker_image}} --filter=${{ github.sha }} --limit 1 --format='table("IT_ALREADY_EXISTS")' | grep IT_ALREADY_EXISTS
@@ -61,7 +65,7 @@ jobs:
 
     # Authenticate Docker to Google Cloud Artifact Registry
     - name: Docker Auth
-      if: '!steps.already-built.outputs.ALREADY_BUILT'
+      if: '!steps.already-built.outputs.ALREADY_BUILT && !inputs.force-overwrite'
       id: docker-auth
       uses: 'docker/login-action@v2'
       with:
@@ -70,7 +74,7 @@ jobs:
         registry: '${{ vars.gar_region }}-docker.pkg.dev'
 
     - name: Skaffold build
-      if: '!steps.already-built.outputs.ALREADY_BUILT'
+      if: '!steps.already-built.outputs.ALREADY_BUILT && !inputs.force-overwrite'
       run: |-
         skaffold build -t ${{ github.sha }} --default-repo=${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
 

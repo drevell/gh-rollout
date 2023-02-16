@@ -6,7 +6,7 @@ name: Build and deploy to dev
 on:
   workflow_dispatch:
   push:
-    branches: [ 'main' ] # TODO think about the real conditions
+    branches: [ 'main' ]
 
 jobs:
   call-build:
