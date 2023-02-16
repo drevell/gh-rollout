@@ -4,6 +4,12 @@ on:
       environment_:
         required: true
         type: string
+  workflow_dispatch:
+    inputs:
+      environment_:
+        required: true
+        type: string
+
 
 jobs:
   deploy:

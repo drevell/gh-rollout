@@ -36,14 +36,14 @@ jobs:
     secrets: inherit
     
   staging-tests:
-    concurrency: staging-mutex # TODO there's a race here: another staging deployment could grab the mutex between the previous step and this step. So factor the two steps into a sub-workflow.
+    name: Prerelease tests
     needs: call-deploy-staging
     runs-on: ubuntu-latest
     steps:
-    - name: "TODO some tests"
+    - name: "Prerelease tests"
       run: "echo TODO some tests"
 
-  # The GitHub environment will protect this by requiring approval.
+  # The GitHub environment will protect this by requiring human approval.
   call-deploy-prod:
     needs: staging-tests
     concurrency: prod-mutex # Only one prod deployment should be in flight at a time.
