@@ -19,8 +19,6 @@ on:
   workflow_call:
   workflow_dispatch:
 
-concurrency: 'build-of-${{ github.sha }}'
-
 jobs:
   build-and-upload:
     name: Build and upload container image
