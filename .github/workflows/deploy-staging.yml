@@ -30,6 +30,7 @@ jobs:
   # The GitHub environment will protect this by requiring approval.
   call-deploy-prod:
     # Only one prod deployment should be in flight at a time.
+    needs: call-deploy-staging
     concurrency: prod-deployment
     name: 'Deploy to prod'
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
