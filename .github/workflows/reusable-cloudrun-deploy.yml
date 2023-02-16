@@ -1,17 +1,5 @@
 on:
   workflow_call:
-    # TODO: the screts might be unnecessary because of repo context
-    secrets:
-      WIF_PROVIDER:
-        # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-        required: true
-      WIF_SERVICE_ACCOUNT:
-        # e.g. - my-service-account@my-project.iam.gserviceaccount.com
-        required: true
-    inputs:
-      environment_:
-        required: true
-        type: string
 
 jobs:
   deploy:
