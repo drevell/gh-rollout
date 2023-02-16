@@ -22,9 +22,9 @@ on:
 jobs:
   build-and-upload:
     name: Build and upload container image
-    # permissions:
-    #   contents: 'read'
-    #   id-token: 'write'
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     runs-on: ubuntu-latest
     concurrency: 'build-of-${{ github.sha }}'
     steps:
