@@ -6,13 +6,17 @@ on:
     - cron: '50 11 * * * ' # Daily early morning push, in UTC.
 
 jobs:
-  # If there's a build in progress for this SHA, wait for it. We can't deploy it to staging until
-  # it's actually built. This concurrency value is shared with the build step.
-  wait-for-build:
+  call-deploy-staging:
+    # If there's a build in progress for this SHA, wait for it. We can't deploy it to staging until
+    # it's actually built. This concurrency value is shared with the build step. We assume that the
+    # build will run first before this workflow, because it's initiated automatically and
+    # immediately when a PR is merged. Whereas this workflow will probably run later. Maybe this
+    # assumption is sketchy.
     concurrency: 'build-of-${{ github.sha }}'
 
-  call-deploy-staging:
-    needs: wait-for-build
+    # Only one staging deployment should be in flight at a time.
+    concurrency: staging-deployment
+
     name: 'Deploy to staging'
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
     permissions:
@@ -25,6 +29,8 @@ jobs:
 
   # The GitHub environment will protect this by requiring approval.
   call-deploy-prod:
+    # Only one prod deployment should be in flight at a time.
+    concurrency: prod-deployment
     name: 'Deploy to prod'
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
     permissions:
