@@ -15,6 +15,8 @@ jobs:
     # immediately when a PR is merged. Whereas this workflow will probably run later. Maybe this
     # assumption is sketchy.
     concurrency: 'build-of-${{ github.sha }}'
+    runs-on: ubuntu-latest
+
     steps:
     - name: No-op
       run: echo "This is a noop step"
