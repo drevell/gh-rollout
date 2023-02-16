@@ -13,7 +13,7 @@
 #    - WIF_PROVIDER: e.g. projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
 #    - WIF_SERVICE_ACCOUNT: e.g. my-service-account@my-project.iam.gserviceaccount.com
 
-# TODO make this manually runnable. Do we have to duplicate the inputs and secrets between workflow_call and workflow_dispatch?
+name: Build and upload
 
 on:
   workflow_call:

@@ -6,9 +6,9 @@ on:
     - cron: '50 11 * * * ' # Daily early morning push, in UTC.
 
 jobs:
-  # The existence of this job is a hack around the fact that we can only have one concurrency key
-  # per job, and we need two.
   wait-for-build:
+    # The existence of this job is a hack around the fact that we can only have one concurrency key
+    # per job, and we need two.
     # If there's a build in progress for this SHA, wait for it. We can't deploy it to staging until
     # it's actually built. This concurrency value is shared with the build step. We assume that the
     # build will run first before this workflow, because it's initiated automatically and
@@ -25,7 +25,7 @@ jobs:
     needs: wait-for-build
 
     # Only one staging deployment should be in flight at a time.
-    concurrency: staging-deployment
+    concurrency: staging-mutex
 
     name: 'Deploy to staging'
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
@@ -35,13 +35,19 @@ jobs:
       environment_: 'staging'
     secrets: inherit
     
-  # TODO run some kind of integration test here
+  TODO run some kind of integration test here
+  staging-tests:
+    concurrency: staging-mutex # TODO there's a race here: another staging deployment could grab the mutex between the previous step and this step. So factor the two steps into a sub-workflow.
+    needs: call-deploy-staging
+    steps:
+    - name: "TODO some tests"
+      run: "echo TODO some tests"
 
   # The GitHub environment will protect this by requiring approval.
   call-deploy-prod:
-    # Only one prod deployment should be in flight at a time.
-    needs: call-deploy-staging
-    concurrency: prod-deployment
+    needs: staging-tests
+    concurrency: prod-mutex # Only one prod deployment should be in flight at a time.
+
     name: 'Deploy to prod'
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
     permissions:
