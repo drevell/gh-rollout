@@ -21,35 +21,6 @@ on:
       WIF_SERVICE_ACCOUNT:
         # e.g. - my-service-account@my-project.iam.gserviceaccount.com
         required: true
-    # inputs:
-      # environment_:  # Trailing underscore avoids confusion with built-in environment
-      #   required: true
-      #   type: string
-      #   description: "the name of the GitHub environment to pull variables and secrets from; e.g. dev"
-      # project_id:
-      #   required: true
-      #   type: string
-      #   description: "the project ID of the project containing the Artifact Registry; e.g. my-project-123"
-      # gar_region:
-      #   required: true
-      #   type: string
-      #   description: "the region of the artifact registry; e.g. us-west1"
-      # gar_repo:
-      #   required: true
-      #   type: string
-      #   description: "the name of the Artifact Registry repository; e.g. my-ci-artifacts"
-      # cloudrun_service:
-      #   required: true
-      #   type: string
-      #   description: "the name of the Cloud Run service to deploy to; e.g. my-cloudrun-service"
-      # cloudrun_region:
-      #   required: true
-      #   type: string
-      #   description: "the region containing the Cloud Run service to deploy to; e.g. us-central1"
-      # docker_image:
-      #   required: true
-      #   type: string
-      #   description: "the name of the docker image to deploy, not including any tags; e.g. my-service-image"
 
 
 jobs:
@@ -84,7 +55,7 @@ jobs:
     - name: Check whether image already exists
       id: already-built
       run: |-
-        if gcloud artifacts docker tags list ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }}/${{ vars.docker_image}} --filter=${{ github.sha }} --limit 1 --format='table("YES_IT_MATCHED")' | grep YES_IT_MATCHED
+        if gcloud artifacts docker tags list ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }}/${{ vars.docker_image}} --filter=${{ github.sha }} --limit 1 --format='table("IT_ALREADY_EXISTS")' | grep IT_ALREADY_EXISTS
         then echo "ALREADY_BUILT=true" >> $GITHUB_OUTPUT
         fi
 
