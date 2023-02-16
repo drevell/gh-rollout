@@ -1,17 +1,18 @@
 name: Deploy to staging/prod
 
-# TODO there's a race here. If main was just pushed, the Docker image might not have been uploaded
-# yet. This can probably be solved by either:
-#  1. adding an idempotent step here for "build if not built" or 
-#  2. fancy shenanigans with the "concurrency" feature.
-
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 3 * * * ' # Daily early morning push
+    - cron: '50 11 * * * ' # Daily early morning push, in UTC.
 
 jobs:
+  # If there's a build in progress for this SHA, wait for it. We can't deploy it to staging until
+  # it's actually built. This concurrency value is shared with the build step.
+  wait-for-build:
+    concurrency: 'build-of-${{ github.sha }}'
+
   call-deploy-staging:
+    needs: wait-for-build
     name: 'Deploy to staging'
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
     permissions:

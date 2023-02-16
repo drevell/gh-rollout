@@ -15,11 +15,6 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    # with:
-      # project_id: '${{ vars.project_id }}'
-      # gar_region: '${{ vars.gar_region }}'
-      # gar_repo: '${{ vars.gar_repo }}'
-      # environment_: 'dev'
     secrets: inherit
   call-deploy-dev:
     name: 'Deploy to dev'

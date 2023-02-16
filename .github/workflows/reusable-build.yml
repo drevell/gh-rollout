@@ -17,13 +17,9 @@
 
 on:
   workflow_call:
-    inputs:
-      force-overwrite:
-        required: false
-        default: false
-        description: 'Force rebuilding and overwriting the container image if it already exists in GAR'
-        type: bool
+  workflow_dispatch:
 
+concurrency: 'build-of-${{ github.sha }}'
 
 jobs:
   build-and-upload:
@@ -32,8 +28,7 @@ jobs:
     #   contents: 'read'
     #   id-token: 'write'
     runs-on: ubuntu-latest
-    # We only want to build each image once. Later builds will exit early (see ALREADY_BUILT below).
-    concurrency: 'building-at-${{ github.sha }}'
+    concurrency: 'build-of-${{ github.sha }}'
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -51,21 +46,8 @@ jobs:
       with:
         install_components: 'skaffold'
 
-    # We made this workflow idempotent so it can be rerun cheaply at the same SHA. This allows us
-    # to just re-run the build if we're not sure the image already exists when it's time for the
-    # staging deployment. The caller can force an unconditional rebuild using the force-rebuild
-    # parameter.
-    - name: Check whether image already exists
-      if: '!inputs.force-overwrite'
-      id: already-built
-      run: |-
-        if gcloud artifacts docker tags list ${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }}/${{ vars.docker_image}} --filter=${{ github.sha }} --limit 1 --format='table("IT_ALREADY_EXISTS")' | grep IT_ALREADY_EXISTS
-        then echo "ALREADY_BUILT=true" >> $GITHUB_OUTPUT
-        fi
-
     # Authenticate Docker to Google Cloud Artifact Registry
     - name: Docker Auth
-      if: '!steps.already-built.outputs.ALREADY_BUILT && !inputs.force-overwrite'
       id: docker-auth
       uses: 'docker/login-action@v2'
       with:
@@ -74,7 +56,6 @@ jobs:
         registry: '${{ vars.gar_region }}-docker.pkg.dev'
 
     - name: Skaffold build
-      if: '!steps.already-built.outputs.ALREADY_BUILT && !inputs.force-overwrite'
       run: |-
         skaffold build -t ${{ github.sha }} --default-repo=${{ vars.gar_region }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
 
