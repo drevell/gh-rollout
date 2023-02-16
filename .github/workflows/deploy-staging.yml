@@ -1,4 +1,4 @@
-name: Deploy to staging
+name: Deploy to staging/prod
 
 # TODO there's a race here. If main was just pushed, the Docker image might not have been uploaded
 # yet. This can probably be solved by either:
@@ -22,4 +22,12 @@ jobs:
     
   # TODO run some kind of integration test here
 
-  # TODO roll out to prod (will be blocked on approval)
+  # The GitHub environment will protect this by requiring approval.
+  call-deploy-prod:
+    name: 'Deploy to prod'
+    uses: './.github/workflows/reusable-cloudrun-deploy.yml'
+    permissions:
+      id-token: 'write'
+    with:
+      environment_: 'prod'
+    secrets: inherit
