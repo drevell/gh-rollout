@@ -27,15 +27,6 @@ jobs:
         workload_identity_provider: '${{ secrets.WIF_PROVIDER }}'
         service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'
 
-    # # Authenticate Docker to Google Cloud Artifact Registry
-    # - name: Docker Auth
-    #   id: docker-auth
-    #   uses: 'docker/login-action@v2'
-    #   with:
-    #     username: 'oauth2accesstoken'
-    #     password: '${{ steps.auth.outputs.access_token }}'
-    #     registry: '${{ vars.gar_region }}-docker.pkg.dev'
-
     - name: Deploy to Cloud Run
       id: deploy
       uses: 'google-github-actions/deploy-cloudrun@v1'

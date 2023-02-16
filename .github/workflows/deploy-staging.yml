@@ -1,0 +1,21 @@
+name: Deploy to staging
+
+# TODO there's a race here. If main was just pushed, the Docker image might not have been uploaded
+# yet. This can probably be solved by adding an idempotent step here for "build if not built" or 
+# fancy shenanigans with the "concurrency" feature.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * * ' # Daily early morning push
+
+jobs:
+  call-deploy-staging:
+    name: 'Deploy to staging'
+    uses: './.github/workflows/reusable-cloudrun-deploy.yml'
+    needs: call-build 
+    permissions:
+      id-token: 'write'
+    with:
+      environment_: 'staging'
+    secrets: inherit
