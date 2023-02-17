@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: "Prerelease tests"
-      run: "echo TODO some tests"
+      run: "echo TODO some tests ; exit 1" # Fake a test failure to see what happens
 
   # The GitHub environment will protect this by requiring human approval.
   call-deploy-prod:
