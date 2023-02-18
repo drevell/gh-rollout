@@ -41,6 +41,13 @@ jobs:
     - name: "Prerelease tests"
       run: "echo TODO some tests"
 
+  # TODO think about rollbacks. Perhaps apply a tag to a release after it's approved but before
+  # it's released? We'd need a new step that only gathers approval, then tag, then release to prod.
+  # Tagging example: https://stackoverflow.com/questions/60963759/use-github-actions-to-create-a-tag-but-not-a-release.
+  # Then the rollback workflow is just "select a tagged release to which you want to roll back".
+
+  # TODO: add gradual rollouts and traffic splitting
+
   # The GitHub environment will protect this by requiring human approval.
   call-deploy-prod:
     needs: staging-tests

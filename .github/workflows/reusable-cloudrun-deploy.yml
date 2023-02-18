@@ -13,7 +13,7 @@ on:
 
 jobs:
   deploy:
-    name: 'Deploy'  # variable substitution doesn't work here, we can't add the env name
+    name: 'Deploy'  # Note: variable substitution doesn't work here, we can't add the env name
     environment: '${{ inputs.environment_ }}'
     runs-on: ubuntu-latest
     permissions:
