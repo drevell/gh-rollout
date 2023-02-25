@@ -16,48 +16,15 @@ resource "google_project" "project" {
 
 
 resource "google_project_service" "default" {
+    depends_on = [
+      google_project.project
+    ]
     for_each = toset([
         "iam.googleapis.com",
         "run.googleapis.com",
     ])
     service  = each.value
     project  = var.project_id
-}
-
-# # TODO comment
-# module "github_ci_access_config" {
-#     source = "github.com/abcxyz/terraform-modules/modules/github_ci_infra"
-#     project_id = var.admin_project_id
-#     github_owner_name = var.github_owner_name
-#     github_repository_name = var.github_repository_name
-#     name = var.service_name  # This is used as part of the CI service account name
-# }
-
-# resource "github_repository_environment" "environments" {
-#     # for_each = var.environments
-#     # environment = each.key
-#     environment = var.environment_name
-
-#     repository = "${var.github.owner_name}/${var.github_repository_name}"
-#     # TODO: reviewers { }
-#     # TODO: deployment_branch_policy { }
-# }
-
-
-resource "google_cloud_run_service" "default" {
-    depends_on = [google_service_account.cloudrun_service_account]
-    name = var.service_name
-    location = var.cloudrun_region
-    project = google_project.project.project_id
-
-    template {
-        spec {
-            service_account_name = google_service_account.cloudrun_service_account.email
-            containers {
-                image = var.initial_container_image
-            }
-        }
-    } 
 }
 
 resource "google_service_account" "cloudrun_service_account" {
@@ -78,7 +45,21 @@ resource "google_service_account_iam_policy" "impersonate" {
     service_account_id = google_service_account.cloudrun_service_account.name
     policy_data = data.google_iam_policy.impersonate.policy_data
 }
+resource "google_cloud_run_service" "default" {
+    depends_on = [google_service_account.cloudrun_service_account]
+    name = var.service_name
+    location = var.cloudrun_region
+    project = google_project.project.project_id
 
+    template {
+        spec {
+            service_account_name = google_service_account.cloudrun_service_account.email
+            containers {
+                image = var.initial_container_image
+            }
+        }
+    } 
+}
 data "google_iam_policy" "developer" {
     binding {
         role = "roles/run.developer"
@@ -104,22 +85,16 @@ resource "google_cloud_run_service_iam_policy" "developer" {
     policy_data = data.google_iam_policy.developer.policy_data
 }
 
-# Likely this will be necessary for public HTTP, test it.
-# TODO add an input variable bool for "should be public".
-#
-# data "google_iam_policy" "noauth" {
-#   binding {
-#     role = "roles/run.invoker"
-#     members = [
-#       "allUsers",
-#     ]
-#   }
-# }
+resource "github_repository_environment" "default" {
+    environment = var.environment_name
+    repository = "${var.github_repository}"
+    reviewers {
+        users = var.reviewer_users
+        teams = var.reviewer_teams
+    }
+    deployment_branch_policy {
+        protected_branches = var.protected_branches
+        custom_branch_policies = false
+    }
+}
 
-# resource "google_cloud_run_service_iam_policy" "noauth" {
-#   location    = google_cloud_run_service.default.location
-#   project     = google_cloud_run_service.default.project
-#   service     = google_cloud_run_service.default.name
-
-#   policy_data = data.google_iam_policy.noauth.policy_data
-# }

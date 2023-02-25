@@ -69,3 +69,22 @@ variable project_id {
 variable project_name {
     type = string
 }
+
+variable github_repository {
+    type = string
+}
+
+variable protected_branches {
+    type = bool
+    default = false
+}
+
+variable reviewer_users {
+    type = list(number)
+    default = null
+}
+
+variable reviewer_teams {
+    type = list(number)
+    default = null
+}
