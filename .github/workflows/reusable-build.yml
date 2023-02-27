@@ -55,6 +55,6 @@ jobs:
 
     - name: Skaffold build
       run: |-
-        skaffold build -t ${{ github.sha }} --default-repo=${{ secrets.gar_location }}-docker.pkg.dev/${{ secrets.admin_project_id }}/${{ secrets.gar_repo }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
+        skaffold build -t ${{ github.sha }} --default-repo=${{ secrets.gar_location }}-docker.pkg.dev/${{ secrets.admin_project_id }}/${{ secrets.gar_repo_id }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
 
  
