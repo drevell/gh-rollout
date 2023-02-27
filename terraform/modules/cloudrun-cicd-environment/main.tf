@@ -87,14 +87,38 @@ resource "google_cloud_run_service_iam_policy" "developer" {
 
 resource "github_repository_environment" "default" {
     environment = var.environment_name
-    repository = "${var.github_repository}"
-    reviewers {
-        users = var.reviewer_users
-        teams = var.reviewer_teams
-    }
-    deployment_branch_policy {
-        protected_branches = var.protected_branches
-        custom_branch_policies = false
-    }
+    # owner = var.github_owner_name
+    # This is just the repo name without the org name. The org name is implied by the github auth token.
+    repository = var.github_repository
+    # repository = "${var.github_owner_name}/${var.github_repository_name}"
+    # reviewers {
+    #     users = var.reviewer_users
+    #     teams = var.reviewer_teams
+    # }
+    # deployment_branch_policy {
+    #     protected_branches = var.protected_branches
+    #     custom_branch_policies = false
+    # }
+}
+
+resource "github_actions_environment_secret" "cloudrun_project_id_secret" {
+    repository = var.github_repository
+    environment = var.environment_name
+    secret_name = "cloudrun_project_id"
+    plaintext_value = google_project.project.project_id
+}
+
+resource "github_actions_environment_secret" "cloudrun_region_secret" {
+    repository = var.github_repository
+    environment = var.environment_name
+    secret_name = "cloudrun_region"
+    plaintext_value = var.cloudrun_region
+}
+
+resource "github_actions_environment_secret" "cloudrun_service_secret" {
+    repository = var.github_repository
+    environment = var.environment_name
+    secret_name = "cloudrun_service"
+    plaintext_value = google_cloud_run_service.default.name
 }
 

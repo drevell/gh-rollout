@@ -40,10 +40,10 @@ variable billing_account {
 #     description = "TODO"
 # }
 
-# variable github_repository_name {
-#     type = string
-#     description = "TODO"
-# }
+variable github_repository {
+    type = string
+    description = "TODO"
+}
 
 variable initial_container_image {
     type = string
@@ -70,9 +70,10 @@ variable project_name {
     type = string
 }
 
-variable github_repository {
-    type = string
-}
+# variable github_repository {
+#     type = string
+#     description = "format is $OWNER/$REPOSITORY"
+# }
 
 variable protected_branches {
     type = bool
