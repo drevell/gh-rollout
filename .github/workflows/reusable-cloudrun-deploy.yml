@@ -32,7 +32,7 @@ jobs:
       id: deploy
       uses: 'google-github-actions/deploy-cloudrun@v1'
       with:
-        service: ${{ vars.cloudrun_service }}
-        region: ${{ vars.cloudrun_region }}
-        project_id: ${{ vars.cloudrun_project_id }}
-        image: ${{ vars.gar_location }}-docker.pkg.dev/${{ vars.admin_project_id }}/${{ vars.gar_repo_id }}/${{ vars.docker_image }}:${{ github.sha }}
+        service: ${{ secrets.cloudrun_service }}
+        region: ${{ secrets.cloudrun_region }}
+        project_id: ${{ secrets.cloudrun_project_id }}
+        image: ${{ secrets.gar_location }}-docker.pkg.dev/${{ secrets.admin_project_id }}/${{ secrets.gar_repo_id }}/${{ secrets.docker_image }}:${{ github.sha }}

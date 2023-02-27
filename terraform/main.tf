@@ -50,6 +50,7 @@ module "github_ci_access_config" {
     github_repository_id = local.github_repository_id
     github_owner_id = local.github_owner_id
     name = local.service_name
+    registry_repository_id = local.service_name
     registry_location = local.gar_location
 }
 
@@ -95,7 +96,7 @@ resource "github_actions_secret" "gar_location_secret" {
 resource "github_actions_secret" "gar_repo_id_secret" { 
     repository = local.github_repository_name
     secret_name = "gar_repo_id"
-    plaintext_value = google_artifact_registry_repository.default.repository_id
+    plaintext_value = local.service_name
 }
 
 # module "hello-service" {
