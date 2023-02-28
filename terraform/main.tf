@@ -7,7 +7,7 @@ locals {
     proj_name_prefix = "revell hello service 03"
     proj_id_prefix = "revell-hello-03"
     service_name = "hello-service"
-    gar_location = "us"
+    gar_location = "us-west1"
 
     # github_owner_name = "drevell"
     github_owner_id = 168090 # github.com/drevell
@@ -129,6 +129,7 @@ resource "github_actions_secret" "gar_repo_id_secret" {
 module dev_environment {
     folder_id = local.folder_id
     billing_account = local.billing_account
+    admin_project_id = google_project.admin_project.project_id
     cicd_service_account_email = module.github_ci_access_config.service_account_email
     github_repository = local.github_repository_name
     source = "./modules/cloudrun-cicd-environment"
@@ -137,11 +138,14 @@ module dev_environment {
     environment_name = "dev"
     cloudrun_region = "us-west1"
     service_name = local.service_name
+    artifact_repository_location = module.github_ci_access_config.artifact_repository_location
+    artifact_repository_id = module.github_ci_access_config.artifact_repository_id
 }
 
 module staging_environment {
     folder_id = local.folder_id
     billing_account = local.billing_account
+    admin_project_id = google_project.admin_project.project_id
     cicd_service_account_email = module.github_ci_access_config.service_account_email
     github_repository = local.github_repository_name
     source = "./modules/cloudrun-cicd-environment"
@@ -150,11 +154,14 @@ module staging_environment {
     environment_name = "staging"
     cloudrun_region = "us-west1"
     service_name = local.service_name
+    artifact_repository_location = module.github_ci_access_config.artifact_repository_location
+    artifact_repository_id = module.github_ci_access_config.artifact_repository_id
 }
 
 module prod_environment {
     folder_id = local.folder_id
     billing_account = local.billing_account
+    admin_project_id = google_project.admin_project.project_id
     cicd_service_account_email = module.github_ci_access_config.service_account_email
     github_repository = local.github_repository_name
     source = "./modules/cloudrun-cicd-environment"
@@ -165,4 +172,6 @@ module prod_environment {
     service_name = local.service_name
     # reviewer_users = []
     protected_branches = true
+    artifact_repository_location = module.github_ci_access_config.artifact_repository_location
+    artifact_repository_id = module.github_ci_access_config.artifact_repository_id
 }

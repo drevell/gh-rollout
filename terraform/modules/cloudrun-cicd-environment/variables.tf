@@ -30,10 +30,10 @@ variable billing_account {
     description = "Billing account with which to create projects"
 }
 
-# variable admin_project_id {
-#     type = string
-#     description = "The project ID of the project hosting build artifacts and WIF config"
-# }
+variable admin_project_id {
+    type = string
+    description = "The project ID of the project hosting build artifacts and WIF config"
+}
 
 # variable github_owner_name {
 #     type = string
@@ -88,4 +88,12 @@ variable reviewer_users {
 variable reviewer_teams {
     type = list(number)
     default = null
+}
+
+variable artifact_repository_location {
+    type = string
+}
+
+variable artifact_repository_id {
+    type = string
 }

@@ -54,9 +54,11 @@ resource "google_cloud_run_service" "default" {
     template {
         spec {
             service_account_name = google_service_account.cloudrun_service_account.email
-            containers {
-                image = var.initial_container_image
-            }
+            # TODO will it still create without this initial image?
+            # TODO remove the initial_container_image if not used
+            # containers {
+            #     image = var.initial_container_image
+            # }
         }
     } 
 }
@@ -85,16 +87,38 @@ resource "google_cloud_run_service_iam_policy" "developer" {
     policy_data = data.google_iam_policy.developer.policy_data
 }
 
+# # The Cloud Run Service Agent must have read access to the GAR repo. 
+# data "google_iam_policy" "gar_reader" {
+#     binding {
+#         role = "roles/artifactregistry.reader"
+#         members = [
+#             "serviceAccount:service-${google_project.project.project_number}@serverless-robot-prod.iam.gserviceaccount.com",
+#         ]
+#     }
+# }
+
+# The Cloud Run Service Agent must have read access to the GAR repo. 
+resource "google_artifact_registry_repository_iam_binding" "cloudrun_sa_gar_reader" {
+    project = var.admin_project_id
+    location = var.artifact_repository_location
+    repository = var.artifact_repository_id
+    role = "roles/artifactregistry.reader"
+    members = [
+        "serviceAccount:service-${google_project.project.number}@serverless-robot-prod.iam.gserviceaccount.com",
+    ]
+}
+
 resource "github_repository_environment" "default" {
     environment = var.environment_name
     # owner = var.github_owner_name
     # This is just the repo name without the org name. The org name is implied by the github auth token.
     repository = var.github_repository
     # repository = "${var.github_owner_name}/${var.github_repository_name}"
-    # reviewers {
-    #     users = var.reviewer_users
-    #     teams = var.reviewer_teams
-    # }
+    reviewers {
+        users = var.reviewer_users
+        teams = var.reviewer_teams
+    }
+    # TODO
     # deployment_branch_policy {
     #     protected_branches = var.protected_branches
     #     custom_branch_policies = false
