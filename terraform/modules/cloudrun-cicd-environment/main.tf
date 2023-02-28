@@ -62,50 +62,41 @@ resource "google_cloud_run_service" "default" {
         }
     } 
 }
-data "google_iam_policy" "developer" {
-    binding {
-        role = "roles/run.developer"
-        members = [
-            "serviceAccount:${var.cicd_service_account_email}",
-        ]
-    }
+# data "google_iam_policy" "developer" {
+#     binding {
+#         role = "roles/run.developer"
+#         members = [
+#             "serviceAccount:${var.cicd_service_account_email}",
+#         ]
+#     }
 
-    # TODO Likely this will be necessary for public HTTP, test it.
-    # TODO add an input variable bool for "should be public".
-    #   binding {
-    #     role = "roles/run.invoker"
-    #     members = [
-    #       "allUsers",
-    #     ]
-    #   }
+#     # TODO Likely this will be necessary for public HTTP, test it.
+#     # TODO add an input variable bool for "should be public".
+#     #   binding {
+#     #     role = "roles/run.invoker"
+#     #     members = [
+#     #       "allUsers",
+#     #     ]
+#     #   }
 
-}
-resource "google_cloud_run_service_iam_policy" "developer" {
+# }
+resource "google_cloud_run_service_iam_member" "developer" {
     location = google_cloud_run_service.default.location
     project  = google_cloud_run_service.default.project
     service = google_cloud_run_service.default.name
-    policy_data = data.google_iam_policy.developer.policy_data
+    # policy_data = data.google_iam_policy.developer.policy_data
+    role = "roles/run.developer"
+    member = "serviceAccount:${var.cicd_service_account_email}"
 }
 
-# # The Cloud Run Service Agent must have read access to the GAR repo. 
-# data "google_iam_policy" "gar_reader" {
-#     binding {
-#         role = "roles/artifactregistry.reader"
-#         members = [
-#             "serviceAccount:service-${google_project.project.project_number}@serverless-robot-prod.iam.gserviceaccount.com",
-#         ]
-#     }
-# }
 
 # The Cloud Run Service Agent must have read access to the GAR repo. 
-resource "google_artifact_registry_repository_iam_binding" "cloudrun_sa_gar_reader" {
+resource "google_artifact_registry_repository_iam_member" "cloudrun_sa_gar_reader" {
     project = var.admin_project_id
     location = var.artifact_repository_location
     repository = var.artifact_repository_id
     role = "roles/artifactregistry.reader"
-    members = [
-        "serviceAccount:service-${google_project.project.number}@serverless-robot-prod.iam.gserviceaccount.com",
-    ]
+    member = "serviceAccount:service-${google_project.project.number}@serverless-robot-prod.iam.gserviceaccount.com"
 }
 
 resource "github_repository_environment" "default" {
