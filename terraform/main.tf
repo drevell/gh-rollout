@@ -16,6 +16,19 @@ locals {
     # github_full_repo_name = "drevell/gh-rollout"
 }
 
+# TODO: expand scope to include creating github repo?
+# resource "github_repository" "example" {
+#   name        = "todo"
+#   description = "todo"
+
+#   visibility = "public"
+
+#   template {
+#     owner      = "foo"
+#     repository = "bar"
+#   }
+# }
+
 resource "google_project" "admin_project" {
     name            = "${local.proj_name_prefix} admin"
     project_id      = "${local.proj_id_prefix}-admin"
@@ -90,7 +103,7 @@ resource "github_actions_secret" "docker_image_secret" {
 resource "github_actions_secret" "gar_location_secret" { 
     repository = local.github_repository_name
     secret_name = "gar_location"
-    plaintext_value = local.gar_location
+    plaintext_value = module.github_ci_access_config.artifact_repository_location
 }
 
 resource "github_actions_secret" "gar_repo_id_secret" { 
