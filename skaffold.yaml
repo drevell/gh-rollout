@@ -9,7 +9,7 @@ build:
   artifacts:
   # The repo name is omitted from the following line because we will use --default-repo on the
   # command line locally and in the GitHub action.
-  - image: my-service-image
+  - image: hello-service
     buildpacks:
       builder: gcr.io/buildpacks/builder:v1
 manifests:
