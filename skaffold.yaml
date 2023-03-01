@@ -1,15 +1,15 @@
 apiVersion: skaffold/v4beta1
 kind: Config
-metadata:
-  name: gh-rollout
 build:
   tagPolicy:
     gitCommit:
       variant: CommitSha # Use the full git commit hash as the docker image tag, not abbreviated
   artifacts:
-  # The repo name is omitted from the following line because we will use --default-repo on the
+  # The repo name is omitted from the image name because we will use --default-repo on the
   # command line locally and in the GitHub action.
-  - image: hello-service
+  # This image name must match the name of the image expected by the GitHub workflow, which is
+  # stored in a GitHub secret or variable.
+  - image: my-hello-service
     buildpacks:
       builder: gcr.io/buildpacks/builder:v1
 manifests:

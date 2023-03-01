@@ -33,18 +33,13 @@ resource "google_service_account" "cloudrun_service_account" {
     display_name = "${var.service_name} ${var.environment_name} SA"
     project      = google_project.project.project_id
 }
-data "google_iam_policy" "impersonate" {
-    binding {
-        role = "roles/iam.serviceAccountUser"
-        members = [
-            "serviceAccount:${var.cicd_service_account_email}",
-        ]
-    }
-}
-resource "google_service_account_iam_policy" "impersonate" {
+
+resource "google_service_account_iam_member" "impersonate" {
     service_account_id = google_service_account.cloudrun_service_account.name
-    policy_data = data.google_iam_policy.impersonate.policy_data
+    role = "roles/iam.serviceAccountUser"
+    member = "serviceAccount:${var.cicd_service_account_email}"
 }
+
 resource "google_cloud_run_service" "default" {
     depends_on = [google_service_account.cloudrun_service_account]
     name = var.service_name
@@ -54,37 +49,23 @@ resource "google_cloud_run_service" "default" {
     template {
         spec {
             service_account_name = google_service_account.cloudrun_service_account.email
-            # TODO will it still create without this initial image?
-            # TODO remove the initial_container_image if not used
-            # containers {
-            #     image = var.initial_container_image
-            # }
+            containers {
+                image = var.initial_container_image
+            }
         }
-    } 
+    }
+
+    lifecycle {
+        # Future application code deployments will replace the initial hello-world image with a
+        # real application container image. Don't revert it back to hello-world. 
+        ignore_changes = [template[0].spec[0].containers]
+    }
 }
-# data "google_iam_policy" "developer" {
-#     binding {
-#         role = "roles/run.developer"
-#         members = [
-#             "serviceAccount:${var.cicd_service_account_email}",
-#         ]
-#     }
 
-#     # TODO Likely this will be necessary for public HTTP, test it.
-#     # TODO add an input variable bool for "should be public".
-#     #   binding {
-#     #     role = "roles/run.invoker"
-#     #     members = [
-#     #       "allUsers",
-#     #     ]
-#     #   }
-
-# }
 resource "google_cloud_run_service_iam_member" "developer" {
     location = google_cloud_run_service.default.location
     project  = google_cloud_run_service.default.project
     service = google_cloud_run_service.default.name
-    # policy_data = data.google_iam_policy.developer.policy_data
     role = "roles/run.developer"
     member = "serviceAccount:${var.cicd_service_account_email}"
 }
@@ -97,14 +78,16 @@ resource "google_artifact_registry_repository_iam_member" "cloudrun_sa_gar_reade
     repository = var.artifact_repository_id
     role = "roles/artifactregistry.reader"
     member = "serviceAccount:service-${google_project.project.number}@serverless-robot-prod.iam.gserviceaccount.com"
+    depends_on = [
+      google_cloud_run_service.default
+    ]
 }
 
 resource "github_repository_environment" "default" {
     environment = var.environment_name
-    # owner = var.github_owner_name
     # This is just the repo name without the org name. The org name is implied by the github auth token.
+    # There's no way to just specify the owner.
     repository = var.github_repository
-    # repository = "${var.github_owner_name}/${var.github_repository_name}"
     reviewers {
         users = var.reviewer_users
         teams = var.reviewer_teams
