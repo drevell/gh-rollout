@@ -1,101 +1,81 @@
-# variable environments {
-#     description = "TODO"
-#     type = map(object({
-#         region = string
-#     }))
-# }
-
 variable "service_name" {
-  description = "TODO"
-  type        = string
+  type = string
+  validation {
+    condition     = can(regex("^[a-z][0-9a-z-]+[0-9a-z]$", var.service_name))
+    error_message = "Name can only contain lowercase letters, numbers, hyphens(-) and must start with letter. Name will be truncated and suffixed with at random string if it exceeds requirements for a given resource."
+  }
+  description = "A string that identifies this service; it will be become part of the name of many of the created resources such as project names"
 }
 
 variable "folder_id" {
   type        = string
-  description = "If creating projects, this will be used as the folder in which to create them"
+  description = "The ID of the GCP folder in which to create projects."
 }
-
-# variable proj_name_prefix {
-#     type = string
-#     description = "The prefix that will be prepended to created project names. Do not include a trailing space."
-# }
-
-# variable proj_id_prefix {
-#     type = string
-#     description = "The prefix that will be prepended to created project IDs. Do not include a trailing hyphen."
-# }
 
 variable "billing_account" {
   type        = string
-  description = "Billing account with which to create projects"
+  default     = null
+  description = "GCP billing account to associate with GCP projects. Since company policy requires GCP projects to be created initially without a billing account and then associated with billing account by a human, this variable will usually be null."
 }
 
 variable "admin_project_id" {
   type        = string
-  description = "The project ID of the project hosting build artifacts and WIF config"
+  description = "The project ID of the GCP project that contains the artifact repository and WIF pool."
 }
 
-# variable github_owner_name {
-#     type = string
-#     description = "TODO"
-# }
-
-variable "github_repository" {
+variable "github_repository_name" {
   type        = string
-  description = "TODO"
+  description = "The name of the GitHub repository containing the service's source code, not including the org/owner."
 }
 
 variable "initial_container_image" {
-  type    = string
-  default = "us-docker.pkg.dev/cloudrun/container/hello"
+  type        = string
+  description = "The path of the docker image that will be served by Cloud Run until the first deployment."
+  default     = "us-docker.pkg.dev/cloudrun/container/hello"
 }
 
 variable "cicd_service_account_email" {
-  type = string
+  type        = string
+  description = "The email address of the service account that the GitHub workflows will authenticate as."
 }
 
 variable "cloudrun_region" {
-  type = string
+  type        = string
+  description = "The GCP region where the Cloud Run service will run."
 }
 
 variable "environment_name" {
-  type = string
+  type        = string
+  description = "The GitHub environment name. It will also be included in some GCP resource names."
 }
-
-variable "project_id" {
-  type = string
-}
-
-variable "project_name" {
-  type = string
-}
-
-# variable github_repository {
-#     type = string
-#     description = "format is $OWNER/$REPOSITORY"
-# }
 
 variable "protected_branches" {
-  type    = bool
-  default = false
+  type        = bool
+  default     = false
+  description = "Whether this environment should only allow deployment from GitHub branches that have protection enabled"
 }
 
-variable "reviewer_user_ids" {
-  type    = list(number)
-  default = null
+variable "reviewer_user_github_ids" {
+  type        = list(number)
+  default     = null
+  description = "A list of GitHub user IDs that will have permission to approve releases into this environment."
 }
 
-variable "reviewer_team_ids" {
-  type    = list(number)
-  default = null
+variable "reviewer_team_github_ids" {
+  type        = list(number)
+  default     = null
+  description = "A list of GitHub team IDs whose members will have permission to approve releases into this environment."
 }
 
 variable "artifact_repository_location" {
-  type = string
+  type        = string
+  description = "The location to create the artifact registry repository (defaults to 'us')."
 }
 
 variable "artifact_repository_id" {
-  type = string
+  type        = string
+  description = "The ID of the GCP Artifact Registry repository holding container images for this service."
+
 }
 
 variable "environment_type" {
