@@ -38,7 +38,6 @@ module "dev" {
   #   source                 = "git::https://github.com/abcxyz/terraform-modules.git//modules/cloudrun_cicd_environment?ref=PUT_LATEST_SHA_OR_TAG_HERE"
   source                 = "../../terraform-modules/modules/cloudrun_cicd_environment"
   svc                    = module.service.resources
-  cloudrun_ingress       = "internal"
   environment_name       = "dev"
   protected_branches     = false
   custom_branch_policies = false
@@ -54,7 +53,6 @@ module "staging" {
   environment_name       = "staging"
   protected_branches     = false
   custom_branch_policies = false
-  cloudrun_ingress       = "internal"
   cloudrun_invokers      = ["user:revell@google.com"]
   cloudrun_region        = "us-west1"
 }
@@ -65,7 +63,6 @@ module "prod" {
   svc                      = module.service.resources
   environment_name         = "prod"
   cloudrun_region          = "us-west1"
-  cloudrun_ingress         = "all"
   cloudrun_invokers        = ["allUsers"]
   protected_branches       = true
   custom_branch_policies   = true
