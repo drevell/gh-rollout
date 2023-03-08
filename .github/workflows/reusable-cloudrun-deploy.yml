@@ -28,10 +28,6 @@ jobs:
         workload_identity_provider: '${{ secrets.wif_provider }}'
         service_account: '${{ secrets.wif_service_account }}'
 
-    - name: Print secrets for debugging
-      run: |
-        echo "!!!!!! ${{ secrets.gar_location }}-docker.pkg.dev/${{ secrets.admin_project_id }}/${{ secrets.gar_repo_id }}/${{ secrets.docker_image }}:${{ github.sha }}" |  sed 's/./& /g'
-
     - name: Deploy to Cloud Run
       id: deploy
       uses: 'google-github-actions/deploy-cloudrun@v1'
@@ -40,3 +36,6 @@ jobs:
         region: ${{ secrets.cloudrun_region }}
         project_id: ${{ secrets.cloudrun_project_id }}
         image: ${{ secrets.gar_location }}-docker.pkg.dev/${{ secrets.admin_project_id }}/${{ secrets.gar_repo_id }}/${{ secrets.docker_image }}:${{ github.sha }}
+
+    - name: Print URL
+      run: 'echo "Deployed to Cloud Run service URL ${{ steps.deploy.outputs.url }}"'
