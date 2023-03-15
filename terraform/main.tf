@@ -98,8 +98,6 @@ locals {
       }
     }
   }
-
-  microservices = ["hello-svc", "bonjour-svc"]
 }
 
 # This block of locals contains implementation details that you may not need to change.
@@ -127,26 +125,21 @@ resource "random_id" "default" {
 #   artifact_repository_location = local.artifact_repository_location
 # }
 
-# You can either create your project-per-environment inside terraform (option 1 below), or use
-# projects that have already been created outside of terraform (option 2 below).
-locals {
-  # # Option 1: create projects in terraform
-  # infra_project_id = "${local.trunc_rand_umbrella_name}-infra" # 30 character limit
-  # serving_project_ids = {
-  #   for env_name, env in local.environments: env_name => "${local.trunc_rand_umbrella_name}-${env_name}"
-  # }
 
-  # Option 2: use projects created outside of terraform
-  infra_project_id = "abcxyz-tycho-cicd-demo-in-1f5a"
-  serving_project_ids = {
-    "dev"     = "abcxyz-tycho-cicd-demo-de-1f5a"
-    "staging" = "abcxyz-tycho-cicd-demo-st-1f5a"
-    "prod"    = "abcxyz-tycho-cicd-demo-pr-1f5a"
-  }
-}
-# # These google_project resources should be uncommented for option 1, and commented out for option 2
-# # (see above for explanation of the options).
-# resource "google_project" "admin_project" {
+#### GCP configuration
+# You can either create your GCP projects inside terraform (option 1 below), or use
+# projects that have already been created outside of terraform and provide their IDs (option 2
+# below).
+#
+#### Option 1: create your GCP projects in terraform:
+# locals {
+#   # Option 1: create projects in terraform
+#   infra_project_id = "${local.trunc_rand_umbrella_name}-infra" # 30 character limit
+#   serving_project_ids = {
+#     for env_name, env in local.environments: env_name => "${local.trunc_rand_umbrella_name}-${env_name}"
+#   }
+# }
+# resource "google_project" "infra_project" {
 #   project_id = local.infra_project_id
 #   # project_id = "revell-cicd-demo-1234"
 #   name = local.infra_project_id
@@ -172,6 +165,16 @@ locals {
 #     ignore_changes = [billing_account]
 #   }
 # }
+#
+#### Option 2: use projects created outside of terraform and provide their IDs
+locals {
+  infra_project_id = "abcxyz-tycho-cicd-demo-in-1f5a"
+  serving_project_ids = {
+    "dev"     = "abcxyz-tycho-cicd-demo-de-1f5a"
+    "staging" = "abcxyz-tycho-cicd-demo-st-1f5a"
+    "prod"    = "abcxyz-tycho-cicd-demo-pr-1f5a"
+  }
+}
 
 locals {
   projects_apis_cross_join = flatten([
@@ -193,13 +196,6 @@ resource "google_project_service" "default" {
   service = each.value.api
 }
 
-resource "google_service_account" "cloudrun_service_account" {
-  for_each = local.environments
-
-  project    = local.serving_project_ids[each.key]
-  account_id = "cloudrun-sa"
-}
-
 # Create the WIF pool, artifact registry, and service account.
 module "github_ci_access_config" {
   source = "git::https://github.com/abcxyz/terraform-modules.git//modules/github_ci_infra?ref=41836e2b91baa1a7552b41f76fb9a8f261ae7dbe"
@@ -210,15 +206,6 @@ module "github_ci_access_config" {
   name                   = local.umbrella_service_name
   registry_repository_id = substr("${local.umbrella_service_name}-images", 0, 63)
   registry_location      = local.artifact_repository_location
-}
-
-resource "google_service_account_iam_member" "impersonate" {
-  for_each = local.environments
-  # for_each = google_service_account.cloudrun_service_account
-  # service_account_id = each.value.name
-  service_account_id = google_service_account.cloudrun_service_account[each.key].name
-  role               = "roles/iam.serviceAccountUser"
-  member             = module.github_ci_access_config.service_account_member
 }
 
 data "google_project" "serving_project_numbers" {
@@ -265,6 +252,15 @@ locals {
   ])
 }
 
+resource "google_service_account" "cloudrun_service_account" {
+  for_each = {
+    for em in local.envs_microservices : "${em.env_name}-${em.microservice_name}" => em
+  }
+
+  project    = local.serving_project_ids[each.value.env_name]
+  account_id = substr("${each.value.microservice_name}-cloudrun-sa", 0, 30) # Max 30 chars
+}
+
 module "cloud_run_service" {
   for_each = {
     for em in local.envs_microservices : "${em.env_name}-${em.microservice_name}" => em
@@ -279,7 +275,7 @@ module "cloud_run_service" {
   min_instances         = each.value.microservice.min_cloudrun_instances
   ingress               = each.value.microservice.ingress
   image                 = local.initial_container_image
-  service_account_email = google_service_account.cloudrun_service_account[each.value.env_name].email
+  service_account_email = google_service_account.cloudrun_service_account[each.key].email
   service_iam = {
     admins     = []
     developers = [module.github_ci_access_config.service_account_member]
@@ -287,15 +283,28 @@ module "cloud_run_service" {
   }
 }
 
+# In order for the CI service account to be able to deploy new releases to the cloud run services, it
+# must have the serviceAccountUser role on the cloud run service accounts.
+resource "google_service_account_iam_member" "impersonate" {
+  for_each = {
+    for em in local.envs_microservices : "${em.env_name}-${em.microservice_name}" => em
+  }
+
+  service_account_id = google_service_account.cloudrun_service_account[each.key].name
+  role               = "roles/iam.serviceAccountUser"
+  member             = module.github_ci_access_config.service_account_member
+}
+
 module "github_vars" {
   # TODO ref
-  # TODO make git::
+  # TODO add git::
   source = "../../terraform-modules/modules/github_cicd_workflow_vars"
 
   infra_project_id = local.infra_project_id
   github_repository_name = local.github_repository_name
   wif_provider_name = module.github_ci_access_config.wif_provider_name
-  service_account_member = module.github_ci_access_config.service_account_member
+  service_account_email = module.github_ci_access_config.service_account_email
   artifact_repository_id = module.github_ci_access_config.artifact_repository_id
   artifact_repository_location = module.github_ci_access_config.artifact_repository_location  
 }
+
