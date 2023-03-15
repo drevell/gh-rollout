@@ -100,44 +100,23 @@ locals {
   }
 }
 
-# This block of locals contains implementation details that you may not need to change.
-locals {
-  # Avoid project ID squatting by using a randomized name.
-  trunc_rand_umbrella_name = "${substr(local.umbrella_service_name, 0, 15)}-${random_id.default.hex}" # Part of project ID. Length 20, allows 10 more for environment name to reach limit 30.
-}
-
-resource "random_id" "default" {
-  byte_length = 2
-}
-
-# # TODO rename
-# module "service" {
-#   #   source = "git::https://github.com/abcxyz/terraform-modules.git//modules/cloudrun_cicd_service?ref=PUT_LATEST_SHA_OR_TAG_HERE"
-#   source = "../../terraform-modules/modules/cloudrun_cicd_service"
-
-#   billing_account = local.billing_account
-
-#   folder_id                    = local.infra_folder
-#   github_owner_id              = local.github_owner_id
-#   github_repository_name       = local.github_repository_name
-#   github_repository_id         = local.github_repository_id
-#   service_name                 = local.umbrella_service_name
-#   artifact_repository_location = local.artifact_repository_location
-# }
-
-
-#### GCP configuration
+#### GCP project configuration
 # You can either create your GCP projects inside terraform (option 1 below), or use
 # projects that have already been created outside of terraform and provide their IDs (option 2
 # below).
 #
 #### Option 1: create your GCP projects in terraform:
 # locals {
+#  # Avoid project ID squatting by using a randomized name.
+#  trunc_rand_umbrella_name = "${substr(local.umbrella_service_name, 0, 15)}-${random_id.default.hex}" # Part of project ID. Length 20, allows 10 more for environment name to reach limit 30.
 #   # Option 1: create projects in terraform
 #   infra_project_id = "${local.trunc_rand_umbrella_name}-infra" # 30 character limit
 #   serving_project_ids = {
 #     for env_name, env in local.environments: env_name => "${local.trunc_rand_umbrella_name}-${env_name}"
 #   }
+# }
+# resource "random_id" "default" {
+#   byte_length = 2
 # }
 # resource "google_project" "infra_project" {
 #   project_id = local.infra_project_id
@@ -175,9 +154,11 @@ locals {
     "prod"    = "abcxyz-tycho-cicd-demo-pr-1f5a"
   }
 }
+#### End of GCP project creation
 
 locals {
-  projects_apis_cross_join = flatten([
+  # Create a list that is the cartesian product of environments and APIs, so we can enable each API on each project.
+  envs_apis_cross_join = flatten([
     for env_name, env in local.environments : [
       for api in local.serving_project_services : {
         env_name : env_name,
@@ -189,7 +170,7 @@ locals {
 
 resource "google_project_service" "default" {
   for_each = {
-    for ps in local.projects_apis_cross_join : "${ps.env_name}-${ps.api}" => ps
+    for ps in local.envs_apis_cross_join : "${ps.env_name}-${ps.api}" => ps
   }
 
   project = local.serving_project_ids[each.value.env_name]
@@ -220,7 +201,16 @@ locals {
   }
 }
 
-# The Cloud Run Service Agent must have read access to the GAR repo. 
+resource "google_project_service_identity" "cloudrun_agent" {
+  provider = google-beta
+
+  for_each = local.environments
+
+  project = local.serving_project_ids[each.key]
+  service = "run.googleapis.com"
+}
+
+# The Cloud Run Service Agent must have read access to the GAR repo to run the docker images. 
 resource "google_artifact_registry_repository_iam_member" "cloudrun_sa_gar_reader" {
   for_each = local.environments
 
@@ -228,7 +218,7 @@ resource "google_artifact_registry_repository_iam_member" "cloudrun_sa_gar_reade
   location   = module.github_ci_access_config.artifact_repository_location
   repository = module.github_ci_access_config.artifact_repository_id
   role       = "roles/artifactregistry.reader"
-  member     = local.cloudrun_service_agents[each.key]
+  member     = "serviceAccount:${google_project_service_identity.cloudrun_agent[each.key].email}"
   depends_on = [
     module.cloud_run_service
   ]
@@ -300,11 +290,11 @@ module "github_vars" {
   # TODO add git::
   source = "../../terraform-modules/modules/github_cicd_workflow_vars"
 
-  infra_project_id = local.infra_project_id
-  github_repository_name = local.github_repository_name
-  wif_provider_name = module.github_ci_access_config.wif_provider_name
-  service_account_email = module.github_ci_access_config.service_account_email
-  artifact_repository_id = module.github_ci_access_config.artifact_repository_id
-  artifact_repository_location = module.github_ci_access_config.artifact_repository_location  
+  infra_project_id             = local.infra_project_id
+  github_repository_name       = local.github_repository_name
+  wif_provider_name            = module.github_ci_access_config.wif_provider_name
+  service_account_email        = module.github_ci_access_config.service_account_email
+  artifact_repository_id       = module.github_ci_access_config.artifact_repository_id
+  artifact_repository_location = module.github_ci_access_config.artifact_repository_location
 }
 
