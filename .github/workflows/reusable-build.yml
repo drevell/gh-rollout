@@ -8,7 +8,7 @@
 #  - There must be these variables configured at the org or repo leve;:
 #    - gar_location: the region containing the Artifact Registry, e.g. "us-west1", "us" 
 #    - _id: the name of the repo within Artifact Registry, e.g. my-container-images
-#    - admin_project_id: the project ID of the project containing Artifact Registry
+#    - infra_project_id: the project ID of the project containing Artifact Registry
 #  - There must also be these secrets:
 #    - wif_provider: e.g. projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
 #    - wif_service_account: e.g. my-service-account@my-project.iam.gserviceaccount.com
@@ -55,6 +55,6 @@ jobs:
 
     - name: Skaffold build
       run: |-
-        skaffold build -t ${{ github.sha }} --default-repo=${{ secrets.gar_location }}-docker.pkg.dev/${{ secrets.admin_project_id }}/${{ secrets.gar_repo_id }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
+        skaffold build -t ${{ github.sha }} --default-repo=${{ secrets.gar_location }}-docker.pkg.dev/${{ secrets.infra_project_id }}/${{ secrets.gar_repo_id }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
 
  

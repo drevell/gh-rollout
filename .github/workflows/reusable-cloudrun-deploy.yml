@@ -35,7 +35,7 @@ jobs:
         service: ${{ secrets.cloudrun_service }}
         region: ${{ secrets.cloudrun_region }}
         project_id: ${{ secrets.cloudrun_project_id }}
-        image: ${{ secrets.gar_location }}-docker.pkg.dev/${{ secrets.admin_project_id }}/${{ secrets.gar_repo_id }}/${{ secrets.docker_image }}:${{ github.sha }}
+        image: ${{ secrets.gar_location }}-docker.pkg.dev/${{ secrets.infra_project_id }}/${{ secrets.gar_repo_id }}/${{ secrets.docker_image }}:${{ github.sha }}
 
     - name: Print URL
       run: 'echo "Deployed to Cloud Run service URL ${{ steps.deploy.outputs.url }}"'
