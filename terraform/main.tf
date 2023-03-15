@@ -14,13 +14,19 @@
 
 # This block of locals contains parameters that are expected to be changed by users.
 locals {
-  # billing_account should be null in the case where you need a human to manually associate
-  # your project with a billing account. In that case, terraform will create projects but fail to
-  # create resources within those projects. After the projects have been associated with a billing
-  # account, re-run terraform to create all remaining resources.
+  # If you already have all your GCP projects created outside of terraform, you don't need to set 
+  # the billing_account variable.
+  #
+  # If you want terraform to create your projects for you, you *might* need to set billing_account.
+  # For many Alphabet users, it's not possible to create GCP projects with a billing account
+  # attached, for policy reasons. For those users, they'll need to create their GCP projects
+  # without a billing account, then follow a manual human process to associate those projects with
+  # a billing account. To do this, set billing_account to null. This will create your projects
+  # without an associated billing account, at which point you can ask the necessary human to
+  # associate the billing account.
   #
   # If, on the other hand, you have permission to create a project with an associated billing
-  # account, you can put it here and terraform will work on the first run.
+  # account, you can set billing_account to a real valueand terraform will work on the first run.
   # billing_account = "009DE6-A7C95A-2AEE97"
   billing_account = null
 
@@ -44,10 +50,8 @@ locals {
     "serviceusage.googleapis.com",
   ]
 
-  # TODO maybe invert this to be named invokers, and have a few maps?
   environments = {
     "dev" : {
-      invokers        = ["user:revell@google.com"]
       folder_id       = local.nonprod_folder
       cloudrun_region = "us-west1"
       microservices = {
@@ -64,7 +68,6 @@ locals {
       }
     }
     "staging" : {
-      invokers        = ["user:revell@google.com"]
       folder_id       = local.nonprod_folder
       cloudrun_region = "us-west1"
       microservices = {
@@ -81,7 +84,6 @@ locals {
       }
     }
     "prod" : {
-      invokers        = ["allUsers"]
       folder_id       = local.prod_folder
       cloudrun_region = "us-central1"
       microservices = {
