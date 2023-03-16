@@ -196,13 +196,6 @@ data "google_project" "serving_project_numbers" {
   project_id = local.serving_project_ids[each.key]
 }
 
-locals {
-  cloudrun_service_agents = {
-    for env_name, env in local.environments :
-    env_name => "serviceAccount:service-${data.google_project.serving_project_numbers[env_name].number}@serverless-robot-prod.iam.gserviceaccount.com"
-  }
-}
-
 resource "google_project_service_identity" "cloudrun_agent" {
   provider = google-beta
 
