@@ -55,4 +55,5 @@ jobs:
       run: |-
         goreleaser -f .goreleaser.docker.yaml release --snapshot --clean
     
- 
+    - name: Docker push
+      run: 'docker push'
