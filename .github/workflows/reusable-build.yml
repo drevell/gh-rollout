@@ -41,8 +41,6 @@ jobs:
 
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v1'
-      with:
-        install_components: 'skaffold'
 
     # Authenticate Docker to Google Cloud Artifact Registry
     - name: Docker Auth
@@ -53,8 +51,8 @@ jobs:
         password: '${{ steps.auth.outputs.access_token }}'
         registry: '${{ secrets.gar_location }}-docker.pkg.dev'
 
-    - name: Skaffold build
+    - name: Goreleaser build
       run: |-
-        skaffold build -t ${{ github.sha }} --default-repo=${{ secrets.gar_location }}-docker.pkg.dev/${{ secrets.infra_project_id }}/${{ secrets.gar_repo_id }} --platform=linux/amd64,linux/arm64 --cache-artifacts=false
-
+        goreleaser -f .goreleaser.docker.yaml release --snapshot --clean
+    
  

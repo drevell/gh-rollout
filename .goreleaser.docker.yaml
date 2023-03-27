@@ -28,7 +28,7 @@ builds:
   -
     id: hello
     main: ./cmd/hello
-    binary: main
+    binary: hello
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - '-a'
@@ -41,12 +41,11 @@ builds:
       - '-X={{ .ModulePath }}/internal/version.Commit={{ .Commit }}'
       - '-extldflags=-static'
     goos:
-      - 'darwin'
+      # - 'darwin'
       - 'linux'
-      - 'windows'
     goarch:
       - 'amd64'
-      - 'arm64'
+      # - 'arm64'
 
 dockers:
   -
@@ -58,7 +57,7 @@ dockers:
     image_templates:
       - '{{ .Env.REGISTRY }}/hello:{{ .Version }}-amd64'
     build_flag_templates:
-      - '--build-arg=APP=cert-rotation'
+      - '--build-arg=APP=hello'
       - '--platform=linux/amd64'
       - '--pull'
       - '--label=org.opencontainers.image.created={{ .CommitTimestamp }}'
