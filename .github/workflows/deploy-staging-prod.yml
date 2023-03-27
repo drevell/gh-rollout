@@ -31,7 +31,6 @@ jobs:
       id-token: 'write'
     with:
       environment_: 'staging'
-    secrets: inherit
     
   staging-tests:
     name: Prerelease tests
@@ -59,4 +58,3 @@ jobs:
       id-token: 'write'
     with:
       environment_: 'prod'
-    secrets: inherit

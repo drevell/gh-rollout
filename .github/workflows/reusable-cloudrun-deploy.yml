@@ -25,17 +25,17 @@ jobs:
       uses: 'google-github-actions/auth@v0'
       with:
         token_format: 'access_token'
-        workload_identity_provider: '${{ secrets.wif_provider }}'
-        service_account: '${{ secrets.wif_service_account }}'
+        workload_identity_provider: '${{ vars.wif_provider }}'
+        service_account: '${{ vars.wif_service_account }}'
 
     - name: Deploy to Cloud Run
       id: deploy
       uses: 'google-github-actions/deploy-cloudrun@v1'
       with:
-        service: ${{ secrets.cloudrun_service }}
-        region: ${{ secrets.cloudrun_region }}
-        project_id: ${{ secrets.cloudrun_project_id }}
-        image: ${{ secrets.gar_location }}-docker.pkg.dev/${{ secrets.infra_project_id }}/${{ secrets.gar_repo_id }}/${{ secrets.docker_image }}:${{ github.sha }}
+        service: ${{ vars.cloudrun_service }}
+        region: ${{ vars.cloudrun_region }}
+        project_id: ${{ vars.cloudrun_project_id }}
+        image: ${{ vars.gar_location }}-docker.pkg.dev/${{ vars.infra_project_id }}/${{ vars.gar_repo_id }}/${{ vars.docker_image }}:${{ github.sha }}
 
     - name: Print URL
       run: 'echo "Deployed to Cloud Run service URL ${{ steps.deploy.outputs.url }}"'

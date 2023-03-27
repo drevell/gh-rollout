@@ -15,7 +15,6 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    secrets: inherit
   call-deploy-dev:
     name: 'Deploy to dev'
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
@@ -24,6 +23,5 @@ jobs:
       id-token: 'write'
     with:
       environment_: 'dev'
-    secrets: inherit
   
   
