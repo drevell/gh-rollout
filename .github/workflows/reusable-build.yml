@@ -52,8 +52,9 @@ jobs:
         registry: '${{ vars.gar_location }}-docker.pkg.dev'
 
     - name: Goreleaser build
-      run: |-
-        goreleaser -f .goreleaser.docker.yaml release --snapshot --clean
+      uses: 'goreleaser/goreleaser-action@v4.2.0' # TODO ratchet
+      with:
+        args: 'release -f .goreleaser.docker.yaml --snapshot --clean'
     
     - name: Docker push
       run: 'docker push'
