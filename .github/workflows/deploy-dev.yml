@@ -18,10 +18,11 @@ jobs:
   call-deploy-dev:
     name: 'Deploy to dev'
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
-    needs: call-build 
+    needs: call-build
     permissions:
       id-token: 'write'
     with:
       environment_: 'dev'
-  
-  
+      cloudrun_service: 'hello' # TODO make this a var
+      cloudrun_region: 'us-west1' # TODO make this a var
+      image: 'hello' # TODO make this a var

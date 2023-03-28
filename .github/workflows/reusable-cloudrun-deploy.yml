@@ -4,11 +4,20 @@ on:
       environment_:
         required: true
         type: string
-  workflow_dispatch:
-    inputs:
-      environment_:
+      cloudrun_service:
         required: true
         type: string
+      cloudrun_region:
+        required: true
+        type: string
+      image:
+        required: true
+        type: string
+  # workflow_dispatch:
+  #   inputs:
+  #     environment_:
+  #       required: true
+  #       type: string
 
 
 jobs:
@@ -18,7 +27,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: 'write'
-
     steps:
     - name: Google Auth
       id: auth
@@ -32,10 +40,10 @@ jobs:
       id: deploy
       uses: 'google-github-actions/deploy-cloudrun@v1'
       with:
-        service: ${{ vars.cloudrun_service }}
-        region: ${{ vars.cloudrun_region }}
-        project_id: ${{ vars.cloudrun_project_id }}
-        image: ${{ vars.gar_location }}-docker.pkg.dev/${{ vars.infra_project_id }}/${{ vars.gar_repo_id }}/${{ vars.docker_image }}:${{ github.sha }}
+        service: ${{ inputs.cloudrun_service }}
+        region: ${{ inputs.cloudrun_region }}
+        project_id: ${{ vars.project_id_for_env }}
+        image: ${{ vars.gar_location }}-docker.pkg.dev/${{ vars.infra_project_id }}/${{ vars.gar_repo_id }}/${{ inputs.image }}:${{ github.sha }}
 
     - name: Print URL
       run: 'echo "Deployed to Cloud Run service URL ${{ steps.deploy.outputs.url }}"'

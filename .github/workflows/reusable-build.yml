@@ -17,7 +17,7 @@ name: Build and upload
 
 on:
   workflow_call:
-  workflow_dispatch:
+  # workflow_dispatch:
 
 jobs:
   build-and-upload:
@@ -68,7 +68,7 @@ jobs:
     - name: Goreleaser build
       uses: 'goreleaser/goreleaser-action@v4.2.0' # TODO ratchet
       with:
-        args: 'release -f .goreleaser.docker.yaml --rm-dist --skip-validate'
+        args: 'release -f .goreleaser.docker.yaml --clean --skip-validate'
       env:
         REGISTRY: '${{ vars.gar_location }}-docker.pkg.dev/${{ vars.infra_project_id}}/${{ vars.gar_repo_id}}'
         DOCKER_TAG: '${{ github.sha }}'

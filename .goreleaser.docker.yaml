@@ -69,6 +69,8 @@ dockers:
       - '--label=org.opencontainers.image.title=hello'
       - '--label=org.opencontainers.image.version={{ .Version }}'
 
-# Disable SCM release we only want docker release here.
+# Disable SCM release we only want docker release here. If this isn't present,
+# goreleaser will complain about missing GITHUB_TOKEN when building a dev
+# build in a GitHub workflow.
 release:
   disable: true
