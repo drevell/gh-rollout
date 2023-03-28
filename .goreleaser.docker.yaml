@@ -55,7 +55,7 @@ dockers:
     goos: 'linux'
     goarch: 'amd64'
     image_templates:
-      - '{{ .Env.REGISTRY }}/hello:{{ .Version }}-amd64'
+      - '{{ .Env.REGISTRY }}/hello:{{ .Env.DOCKER_TAG }}-amd64'
     build_flag_templates:
       - '--build-arg=APP=hello'
       - '--platform=linux/amd64'

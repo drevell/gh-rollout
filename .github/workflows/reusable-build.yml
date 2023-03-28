@@ -22,8 +22,8 @@ on:
 jobs:
   build-and-upload:
     name: Build and upload container image
-    outputs: 
-      built-version: '${{ steps.docker_push.built-version }}'
+    # outputs: 
+    #   built-version: '${{ steps.docker_push.built-version }}'
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -57,18 +57,27 @@ jobs:
         password: '${{ steps.auth.outputs.access_token }}'
         registry: '${{ vars.gar_location }}-docker.pkg.dev'
 
+    # goreleaser requires a tag to publish images to container registry.
+    # We create a local tag to make it happy.
+    - name: 'Apply local tag to allow goreleaser to push'
+      run: |-
+        git config user.name "${GITHUB_ACTOR}"
+        git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        git tag -f `date "+%Y%m%d%H%M%S"`
+
     - name: Goreleaser build
       uses: 'goreleaser/goreleaser-action@v4.2.0' # TODO ratchet
       with:
-        args: 'release -f .goreleaser.docker.yaml --snapshot --clean'
+        args: 'release -f .goreleaser.docker.yaml --clean'
       env:
         REGISTRY: '${{ vars.gar_location }}-docker.pkg.dev/${{ vars.infra_project_id}}/${{ vars.gar_repo_id}}'
+        DOCKER_TAG: '${{ github.sha }}'
 
-    - name: Docker push
-      id: docker_push
-      run: |-
-        BUILT_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "^${{ vars.gar_location }}-docker.pkg.dev/${{ vars.infra_project_id}}/${{ vars.gar_repo_id}}/" | head -n 1)
-        echo "BUILT_IMAGE is $BUILT_IMAGE"
-        docker push $BUILT_IMAGE || exit
-        echo "::set_output name=built-version::${BUILT_IMAGE}"
+    # - name: Docker push
+    #   id: docker_push
+    #   run: |-
+    #     BUILT_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "^${{ vars.gar_location }}-docker.pkg.dev/${{ vars.infra_project_id}}/${{ vars.gar_repo_id}}/" | head -n 1)
+    #     echo "BUILT_IMAGE is $BUILT_IMAGE"
+    #     docker push $BUILT_IMAGE || exit
+    #     echo "::set_output name=built-version::${BUILT_IMAGE}"
         
