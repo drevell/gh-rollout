@@ -68,3 +68,7 @@ dockers:
       - '--label=org.opencontainers.image.source={{ .GitURL }}'
       - '--label=org.opencontainers.image.title=hello'
       - '--label=org.opencontainers.image.version={{ .Version }}'
+
+# Disable SCM release we only want docker release here.
+release:
+  disable: true
