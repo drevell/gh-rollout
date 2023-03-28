@@ -43,7 +43,7 @@ jobs:
         service: ${{ inputs.cloudrun_service }}
         region: ${{ inputs.cloudrun_region }}
         project_id: ${{ vars.project_id_for_env }}
-        image: ${{ vars.gar_location }}-docker.pkg.dev/${{ vars.infra_project_id }}/${{ vars.gar_repo_id }}/${{ inputs.image }}:${{ github.sha }}
+        image: ${{ vars.gar_location }}-docker.pkg.dev/${{ vars.infra_project_id }}/${{ vars.gar_repo_id }}/${{ inputs.image }}:${{ github.sha }}-amd64
 
     - name: Print URL
       run: 'echo "Deployed to Cloud Run service URL ${{ steps.deploy.outputs.url }}"'
