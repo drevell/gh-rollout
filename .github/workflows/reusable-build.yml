@@ -22,6 +22,8 @@ on:
 jobs:
   build-and-upload:
     name: Build and upload container image
+    outputs: 
+      built-version: '${{ steps.docker_push.built-version }}'
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -63,5 +65,9 @@ jobs:
         REGISTRY: '${{ vars.gar_location }}-docker.pkg-dev/${{ vars.infra_project_id}}/${{ vars.gar_repo_id}}'
 
     - name: Docker push
+      id: docker_push
       run: |-
-        docker images --format "{{.Repository}}:{{.Tag}}" | grep "^${{ vars.gar_location }}-docker.pkg-dev/${{ vars.infra_project_id}}/${{ vars.gar_repo_id}}/" | head -n 1 | xargs docker push
+        BUILT_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "^${{ vars.gar_location }}-docker.pkg-dev/${{ vars.infra_project_id}}/${{ vars.gar_repo_id}}/" | head -n 1)
+        docker push $BUILT_IMAGE || exit
+        echo "::set_output name=built-version::${BUILT_IMAGE}"
+        
