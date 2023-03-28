@@ -59,6 +59,9 @@ jobs:
       uses: 'goreleaser/goreleaser-action@v4.2.0' # TODO ratchet
       with:
         args: 'release -f .goreleaser.docker.yaml --snapshot --clean'
+      env:
+        REGISTRY: '${{ vars.gar_location }}-docker.pkg-dev/${{ vars.infra_project_id}}/${{ vars.gar_repo_id}}'
     
     - name: Docker push
-      run: 'docker push'
+      run: |-
+        docker images --format "{{.Repository}}:{{.Tag}}" | grep "^${{ vars.gar_location }}-docker.pkg-dev/${{ vars.infra_project_id}}/${{ vars.gar_repo_id}}:" | head -n 1 | xargs docker push
