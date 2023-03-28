@@ -61,14 +61,6 @@ jobs:
         args: 'release -f .goreleaser.docker.yaml --snapshot --clean'
       env:
         REGISTRY: '${{ vars.gar_location }}-docker.pkg-dev/${{ vars.infra_project_id}}/${{ vars.gar_repo_id}}'
-    
-    - name: Silly debugging 1
-      run: |-
-        docker images --format "{{.Repository}}:{{.Tag}}" 
-
-    - name: Silly debugging 2
-      run: |-
-        docker images --format "{{.Repository}}:{{.Tag}}" | grep "^${{ vars.gar_location }}-docker.pkg-dev/${{ vars.infra_project_id}}/${{ vars.gar_repo_id}}/" 
 
     - name: Docker push
       run: |-
