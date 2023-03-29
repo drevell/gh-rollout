@@ -15,14 +15,25 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-  call-deploy-dev:
-    name: 'Deploy to dev'
+  call-deploy-dev-hello-svc:
+    name: 'Deploy hello-svc to dev'
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
     needs: call-build
     permissions:
       id-token: 'write'
     with:
       environment_: 'dev'
-      cloudrun_service: 'hello-svc-3071' # TODO make this a var
-      cloudrun_region: 'us-west1' # TODO make this a var
-      image: 'hello' # TODO make this a var
+      cloudrun_service: 'hello-svc-3071' # TODO make this a var?
+      cloudrun_region: 'us-west1' # TODO make this a var?
+      image: 'hello' # TODO make this a var?
+  call-deploy-dev-bonjour-svc:
+    name: 'Deploy bonjour-svc to dev'
+    uses: './.github/workflows/reusable-cloudrun-deploy.yml'
+    needs: call-build
+    permissions:
+      id-token: 'write'
+    with:
+      environment_: 'dev'
+      cloudrun_service: 'bonjour-svc-eb2a' # TODO make this a var?
+      cloudrun_region: 'us-west1' # TODO make this a var?
+      image: 'hello' # TODO make this a var?
