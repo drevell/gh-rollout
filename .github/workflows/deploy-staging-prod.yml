@@ -21,6 +21,7 @@ jobs:
 
   call-deploy-staging-hello-svc:
     name: 'Deploy hello-svc to staging'
+    needs: wait-for-build
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
     permissions:
       id-token: 'write'
@@ -31,6 +32,7 @@ jobs:
       image: 'hello'
   call-deploy-staging-bonjour-svc:
     name: 'Deploy bonjour-svc to staging'
+    needs: wait-for-build
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
     permissions:
       id-token: 'write'
