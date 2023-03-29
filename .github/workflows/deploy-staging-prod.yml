@@ -55,10 +55,10 @@ jobs:
   # Then the rollback workflow is just "select a tagged release to which you want to roll back".
 
   # TODO: add gradual rollouts and traffic splitting
-
   # The GitHub environment will protect this by requiring human approval.
   call-deploy-prod-hello-svc:
     name: 'Deploy hello-svc to prod'
+    needs: staging-tests
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
     permissions:
       id-token: 'write'
@@ -69,6 +69,7 @@ jobs:
       image: 'hello'
   call-deploy-prod-bonjour-svc:
     name: 'Deploy bonjour-svc to prod'
+    needs: staging-tests
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
     permissions:
       id-token: 'write'
