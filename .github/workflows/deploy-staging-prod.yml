@@ -19,6 +19,8 @@ jobs:
     - name: No-op
       run: echo "This is a noop step that just waits for the build to finish"
 
+  # TODO maybe add another job here that verifies that the build was successful using gcloud list docker images?
+
   call-deploy-staging-hello-svc:
     name: 'Deploy hello-svc to staging'
     needs: wait-for-build
@@ -67,7 +69,7 @@ jobs:
     with:
       environment_: 'prod'
       cloudrun_service: 'hello-svc-3680'
-      cloudrun_region: 'us-west1'
+      cloudrun_region: 'us-central1'
       image: 'hello'
   call-deploy-prod-bonjour-svc:
     name: 'Deploy bonjour-svc to prod'
@@ -78,5 +80,5 @@ jobs:
     with:
       environment_: 'prod'
       cloudrun_service: 'bonjour-svc-bb0f'
-      cloudrun_region: 'us-west1'
+      cloudrun_region: 'us-central1'
       image: 'hello'
