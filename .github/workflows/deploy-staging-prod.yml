@@ -19,22 +19,31 @@ jobs:
     - name: No-op
       run: echo "This is a noop step that just waits for the build to finish"
 
-  call-deploy-staging:
-    needs: wait-for-build
-
-    # Only one staging deployment should be in flight at a time.
-    concurrency: staging-mutex
-
-    name: 'Deploy to staging'
+  call-deploy-staging-hello-svc:
+    name: 'Deploy hello-svc to staging'
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
     permissions:
       id-token: 'write'
     with:
       environment_: 'staging'
+      cloudrun_service: 'hello-svc-21de'
+      cloudrun_region: 'us-west1'
+      image: 'hello'
+  call-deploy-staging-bonjour-svc:
+    name: 'Deploy bonjour-svc to staging'
+    uses: './.github/workflows/reusable-cloudrun-deploy.yml'
+    permissions:
+      id-token: 'write'
+    with:
+      environment_: 'staging'
+      cloudrun_service: 'bonjour-svc-9e52'
+      cloudrun_region: 'us-west1'
+      image: 'hello'
+
     
   staging-tests:
     name: Prerelease tests
-    needs: call-deploy-staging
+    needs: [call-deploy-staging-hello-svc, call-deploy-staging-bonjour-svc]
     runs-on: ubuntu-latest
     steps:
     - name: "Prerelease tests"
@@ -48,13 +57,23 @@ jobs:
   # TODO: add gradual rollouts and traffic splitting
 
   # The GitHub environment will protect this by requiring human approval.
-  call-deploy-prod:
-    needs: staging-tests
-    concurrency: prod-mutex # Only one prod deployment should be in flight at a time.
-
-    name: 'Deploy to prod'
+  call-deploy-prod-hello-svc:
+    name: 'Deploy hello-svc to prod'
     uses: './.github/workflows/reusable-cloudrun-deploy.yml'
     permissions:
       id-token: 'write'
     with:
       environment_: 'prod'
+      cloudrun_service: 'hello-svc-3680'
+      cloudrun_region: 'us-west1'
+      image: 'hello'
+  call-deploy-prod-bonjour-svc:
+    name: 'Deploy bonjour-svc to prod'
+    uses: './.github/workflows/reusable-cloudrun-deploy.yml'
+    permissions:
+      id-token: 'write'
+    with:
+      environment_: 'prod'
+      cloudrun_service: 'bonjour-svc-bb0f'
+      cloudrun_region: 'us-west1'
+      image: 'hello'
