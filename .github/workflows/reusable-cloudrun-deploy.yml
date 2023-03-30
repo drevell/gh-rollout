@@ -36,14 +36,21 @@ jobs:
         workload_identity_provider: '${{ vars.wif_provider }}'
         service_account: '${{ vars.wif_service_account }}'
 
-    - name: Deploy to Cloud Run
-      id: deploy
-      uses: 'google-github-actions/deploy-cloudrun@v1'
-      with:
-        service: ${{ inputs.cloudrun_service }}
-        region: ${{ inputs.cloudrun_region }}
-        project_id: ${{ vars.project_id_for_env }}
-        image: ${{ vars.gar_location }}-docker.pkg.dev/${{ vars.infra_project_id }}/${{ vars.gar_repo_id }}/${{ inputs.image }}:${{ github.sha }}-amd64
+    - name: 'Deploy to Cloud Run'
+      run: |-
+        gcloud run deploy ${{ inputs.cloudrun_service }}
+        --image ${{ vars.gar_location }}-docker.pkg.dev/${{ vars.infra_project_id }}/${{ vars.gar_repo_id }}/${{ inputs.image }}:${{ github.sha }}-amd64
+        --quiet --platform managed --region ${{ inputs.cloudrun_region }}
+        --project ${{ vars.project_id_for_env }} --format json
+
+    # - name: Deploy to Cloud Run
+    #   id: deploy
+    #   uses: 'google-github-actions/deploy-cloudrun@v1'
+    #   with:
+    #     service: ${{ inputs.cloudrun_service }}
+    #     region: ${{ inputs.cloudrun_region }}
+    #     project_id: ${{ vars.project_id_for_env }}
+    #     image: ${{ vars.gar_location }}-docker.pkg.dev/${{ vars.infra_project_id }}/${{ vars.gar_repo_id }}/${{ inputs.image }}:${{ github.sha }}-amd64
 
     - name: Print URL
       run: 'echo "Deployed to Cloud Run service URL ${{ steps.deploy.outputs.url }}"'

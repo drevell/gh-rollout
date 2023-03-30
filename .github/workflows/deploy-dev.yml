@@ -39,3 +39,10 @@ jobs:
       cloudrun_service: 'bonjour-svc-eb2a' # TODO make this a var?
       cloudrun_region: 'us-west1' # TODO make this a var?
       image: 'hello' # TODO make this a var?
+
+    # env staging:
+    #   var hello_cloudrun_service_is=hello-svc-3071
+    #   var hello_cloudrun_region=us-west1
+    #   var hello_cloudrun_image=us-west1
+      
+    #   var bonjour_cloudrun_service_is=bonjour-svc-eb2a

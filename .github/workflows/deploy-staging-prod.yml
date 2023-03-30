@@ -7,6 +7,7 @@ on:
 
 jobs:
   wait-for-build:
+    name: 'Wait for build'
     # If there's a build in progress for this SHA, wait for it. We can't deploy it to staging until
     # it's actually built. This concurrency value is shared with the build step. We assume that the
     # build will run first before this workflow, because it's initiated automatically and
