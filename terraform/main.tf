@@ -74,12 +74,12 @@ locals {
           # Cloud Run ingress, https://cloud.google.com/run/docs/securing/ingress
           ingress = "all"
           # Cloud Run invokers, https://cloud.google.com/run/docs/securing/managing-access
-          invokers = ["user:revell@tycho.joonix.net", "user:revell@google.com"]
+          invokers = ["user:revell@tycho.joonix.net"]
         }
         "bonjour-svc" : {
           min_cloudrun_instances = 1
           ingress                = "all"
-          invokers               = ["user:revell@tycho.joonix.net", "user:revell@google.com"]
+          invokers               = ["user:revell@tycho.joonix.net"]
         }
       }
     }
@@ -100,12 +100,12 @@ locals {
         "hello-svc" : {
           min_cloudrun_instances = 1
           ingress                = "all"
-          invokers               = ["user:revell@tycho.joonix.net", "user:revell@google.com"]
+          invokers               = ["user:revell@tycho.joonix.net"]
         }
         "bonjour-svc" : {
           min_cloudrun_instances = 1
           ingress                = "all"
-          invokers               = ["user:revell@tycho.joonix.net", "user:revell@google.com"]
+          invokers               = ["user:revell@tycho.joonix.net"]
         }
       }
     }
@@ -126,12 +126,12 @@ locals {
       microservices = {
         "hello-svc" : {
           min_cloudrun_instances = 3
-          invokers               = ["allUsers"] # Do this to be publicly accessible
+          invokers               = ["user:revell@tycho.joonix.net"]
           ingress                = "all"
         }
         "bonjour-svc" : {
           min_cloudrun_instances = 3
-          invokers               = ["user:revell@google.com", "user:revell@tycho.joonix.net"]
+          invokers               = ["user:revell@tycho.joonix.net"]
           ingress                = "all"
         }
       }
@@ -175,11 +175,11 @@ locals {
 #
 #### Option 2: use projects created outside of terraform and provide their IDs
 locals {
-  infra_project_id = "abcxyz-tycho-cicd-demo-in-1f5a"
+  infra_project_id = "tycho-cicd-demo-infra-1f5a"
   serving_project_ids = {
-    "dev"     = "abcxyz-tycho-cicd-demo-de-1f5a"
-    "staging" = "abcxyz-tycho-cicd-demo-st-1f5a"
-    "prod"    = "abcxyz-tycho-cicd-demo-pr-1f5a"
+    "dev"     = "tycho-cicd-demo-dev-1f5a"
+    "staging" = "tycho-cicd-demo-staging-1f5a"
+    "prod"    = "tycho-cicd-demo-prod-1f5a"
   }
 }
 #### End of GCP project creation
@@ -208,7 +208,7 @@ resource "google_project_service" "default" {
 
 # Create the WIF pool, artifact registry, and service account.
 module "github_ci_access_config" {
-  source = "git::https://github.com/abcxyz/terraform-modules.git//modules/github_ci_infra?ref=41836e2b91baa1a7552b41f76fb9a8f261ae7dbe"
+  source = "git::https://github.com/abcxyz/terraform-modules.git//modules/github_ci_infra"
 
   project_id = local.infra_project_id
 

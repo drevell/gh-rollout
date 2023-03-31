@@ -15,6 +15,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+      
 
   # Deploy all services in parallel
   call-deploy-dev-hello-svc:
